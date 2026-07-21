@@ -2,34 +2,80 @@ import edge_tts
 import asyncio
 import os
 import pandas as pd
+from config import TEXT_DIR, AUDIO_DIR
 
-# 创建输出文件夹
-os.makedirs("fraud_audio", exist_ok=True)
+# ========== 配置区 ==========
+# 在这里定义所有音频系列
+CATEGORIES = {
+    "fraud": {
+        "csv": "诈骗话术.csv",
+        "dir": os.path.join(AUDIO_DIR, "fraud_audio"),
+        "prefix": "",
+        "label": "诈骗音频"
+    },
+    "ad": {
+        "csv": "电话广告话术.csv",
+        "dir": os.path.join(AUDIO_DIR, "ad_audio"),
+        "prefix": "ad_",
+        "label": "广告音频"
+    },
+}
 
-# 读取 CSV（用 gbk 编码）
-df = pd.read_csv("诈骗话术_text_label_type_voice.csv", encoding="gbk")
+# 选择要生成的系列
+SELECTED = ["fraud"]  # 可选 "fraud", "ad"，或全选
 
+SEMAPHORE_LIMIT = 10  # 并发数
+# ===========================
 
-async def generate_one(row, index):
-    text = row["text"]
-    category = row["type"]
-    voice = row["voice"]
+async def generate_series(series_name, config, retries=3):
+    """生成单个系列的音频"""
+    csv_path = os.path.join(TEXT_DIR, config["csv"])
+    output_dir = config["dir"]
+    prefix = config["prefix"]
+    label = config["label"]
 
-    safe_category = category.replace("/", "_").replace(" ", "")
-    filename = f"fraud_audio/{index + 1:03d}_{safe_category}.mp3"
+    os.makedirs(output_dir, exist_ok=True)
+    df = pd.read_csv(csv_path, encoding="gbk")
+    semaphore = asyncio.Semaphore(SEMAPHORE_LIMIT)
 
-    communicate = edge_tts.Communicate(text, voice)
-    await communicate.save(filename)
+    async def generate_one(row, index):
+        text = row["text"]
+        category = row["type"]
+        voice = row["voice"]
+        safe_category = category.replace("/", "_").replace(" ", "")
+        filename = os.path.join(output_dir, f"{prefix}{index+1:03d}_{safe_category}.mp3")
 
-    print(f"[{index + 1}/{len(df)}] {filename}")
+        for attempt in range(retries):
+            try:
+                async with semaphore:
+                    communicate = edge_tts.Communicate(text, voice)
+                    await communicate.save(filename)
+                    print(f"✅ [{index+1}/{len(df)}] {os.path.basename(filename)}")
+                    return
+            except Exception as e:
+                print(f"⚠️ 第 {index+1} 条失败 (尝试 {attempt+1}/{retries})")
+                if attempt < retries - 1:
+                    await asyncio.sleep(2)
+                else:
+                    print(f"❌ 第 {index+1} 条最终失败: {os.path.basename(filename)}")
 
-
-async def main():
-    print(f"共 {len(df)} 条话术，开始生成...")
+    print(f"\n[{label}] 共 {len(df)} 条，开始生成到 {os.path.basename(output_dir)}...")
     tasks = [generate_one(row, i) for i, row in df.iterrows()]
     await asyncio.gather(*tasks)
-    print("全部完成！")
+    print(f"[{label}] 生成完成！")
 
+async def main():
+    if not SELECTED:
+        print("⚠️ 请先在 SELECTED 中选择要生成的系列（如 ['fraud', 'ad']）")
+        return
+
+    for series_name in SELECTED:
+        if series_name not in CATEGORIES:
+            print(f"⚠️ 未知系列 '{series_name}'，跳过")
+            continue
+        await generate_series(series_name, CATEGORIES[series_name])
+
+    print("\n所有任务完成！")
 
 if __name__ == "__main__":
     asyncio.run(main())
