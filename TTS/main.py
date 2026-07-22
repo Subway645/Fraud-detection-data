@@ -20,7 +20,7 @@ CATEGORIES = {
     },
 }
 
-SELECTED = ["ad"]  # 可选 "fraud", "ad"，或全选
+SELECTED = ["fraud"]  # 可选 "fraud", "ad"，或全选
 SEMAPHORE_LIMIT = 10
 # ===========================
 
