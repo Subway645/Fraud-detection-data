@@ -11,8 +11,8 @@ CATEGORY = "both"  # "fraud" / "ad" / "both"
 
 def add_reverb(y, sr, strength=0.5):
     """添加混响效果"""
-    delay = int(0.08 * sr)  # 80ms 延迟
-    decay = 0.3 + 0.5 * strength  # strength 0→0.3, 1→0.8
+    delay = int(0.08 * sr)
+    decay = 0.3 + 0.5 * strength
     y_reverb = y.copy()
     delayed = np.zeros_like(y)
     delayed[delay:] = y[:-delay] * decay
@@ -24,7 +24,7 @@ def add_noise(y, level=0.005):
     return y + noise
 
 def apply_low_quality(y, sr, strength=0.5):
-    """模拟低音质（降低采样率再恢复）"""
+    """模拟低音质"""
     target_sr = int(16000 - 8000 * strength)
     if target_sr < 4000:
         target_sr = 4000
@@ -41,41 +41,33 @@ def adjust_pitch(y, sr, n_steps):
     return librosa.effects.pitch_shift(y, sr=sr, n_steps=n_steps)
 
 def process_one(input_path, output_path, row):
-    """处理单个音频文件"""
     try:
         y, sr = librosa.load(input_path, sr=None)
 
-        # 1. 混响
         reverb_val = float(row.get("augment_reverb", 0))
         if reverb_val > 0:
             y = add_reverb(y, sr, reverb_val)
 
-        # 2. 噪声
         noise_val = float(row.get("augment_noise", 0))
         if noise_val > 0:
             y = add_noise(y, noise_val)
 
-        # 3. 变速
         speed_val = float(row.get("augment_speed", 1.0))
         if speed_val != 1.0:
             y = librosa.effects.time_stretch(y, rate=speed_val)
 
-        # 4. 低音质
         low_quality_val = float(row.get("augment_low_quality", 0))
         if low_quality_val > 0:
             y = apply_low_quality(y, sr, low_quality_val)
 
-        # 5. 音量调整
         volume_val = float(row.get("augment_volume", 1.0))
         if volume_val != 1.0:
             y = adjust_volume(y, volume_val)
 
-        # 6. 音调调整
         pitch_val = float(row.get("augment_pitch", 0))
         if pitch_val != 0:
             y = adjust_pitch(y, sr, pitch_val)
 
-        # 保存处理后的音频
         sf.write(output_path, y, sr)
         return True
     except Exception as e:
@@ -83,17 +75,14 @@ def process_one(input_path, output_path, row):
         return False
 
 def process_series(csv_name, audio_dir, prefix="", label=""):
-    """批量处理一个系列"""
     csv_path = os.path.join(TEXT_DIR, csv_name)
     df = pd.read_csv(csv_path, encoding="gbk")
 
-    # 检查是否有增强列
     has_augment = any(col.startswith("augment_") for col in df.columns)
     if not has_augment:
         print(f"⚠️ {label} 没有增强列，跳过")
         return
 
-    # 创建输出目录
     output_dir = os.path.join(audio_dir, "processed")
     os.makedirs(output_dir, exist_ok=True)
 
@@ -115,13 +104,13 @@ def process_series(csv_name, audio_dir, prefix="", label=""):
 
 if __name__ == "__main__":
     CATEGORIES = {
-        "fraud": {"dir": FRAUD_DIR, "label": "诈骗音频"},
-        "ad": {"dir": AD_DIR, "label": "广告音频"},
+        "fraud": {"dir": FRAUD_DIR, "label": "Fraud Audio"},
+        "ad": {"dir": AD_DIR, "label": "Ad Audio"},
     }
 
     if CATEGORY in ["fraud", "both"]:
-        process_series("诈骗话术.csv", FRAUD_DIR, prefix="", label="诈骗音频")
+        process_series("fraud_utterances.csv", FRAUD_DIR, prefix="", label="Fraud Audio")
     if CATEGORY in ["ad", "both"]:
-        process_series("电话广告话术.csv", AD_DIR, prefix="ad_", label="广告音频")
+        process_series("ad_utterances.csv", AD_DIR, prefix="ad_", label="Ad Audio")
 
     print("\n所有后期处理任务完成！")

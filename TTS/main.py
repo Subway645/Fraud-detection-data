@@ -5,30 +5,26 @@ import pandas as pd
 from config import TEXT_DIR, AUDIO_DIR
 
 # ========== 配置区 ==========
-# 在这里定义所有音频系列
 CATEGORIES = {
     "fraud": {
-        "csv": "诈骗话术.csv",
+        "csv": "fraud_utterances.csv",
         "dir": os.path.join(AUDIO_DIR, "fraud_audio"),
         "prefix": "",
-        "label": "诈骗音频"
+        "label": "Fraud Audio"
     },
     "ad": {
-        "csv": "电话广告话术.csv",
+        "csv": "ad_utterances.csv",
         "dir": os.path.join(AUDIO_DIR, "ad_audio"),
         "prefix": "ad_",
-        "label": "广告音频"
+        "label": "Ad Audio"
     },
 }
 
-# 选择要生成的系列
-SELECTED = ["fraud"]  # 可选 "fraud", "ad"，或全选
-
-SEMAPHORE_LIMIT = 10  # 并发数
+SELECTED = ["ad"]  # 可选 "fraud", "ad"，或全选
+SEMAPHORE_LIMIT = 10
 # ===========================
 
 async def generate_series(series_name, config, retries=3):
-    """生成单个系列的音频"""
     csv_path = os.path.join(TEXT_DIR, config["csv"])
     output_dir = config["dir"]
     prefix = config["prefix"]

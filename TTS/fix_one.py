@@ -4,18 +4,17 @@ import pandas as pd
 import os
 from config import TEXT_DIR, FRAUD_DIR, AD_DIR
 
-# ===== 在这里修改你要修复的内容 =====
-CATEGORY = "ad"      # 可选 "fraud" 或 "ad"
-INDEX = 1            # 要修复的序号（从1开始）
-# ===================================
+# ===== 在这里修改 =====
+CATEGORY = "ad"      # "fraud" 或 "ad"
+INDEX = 1
+# =====================
 
-# 根据类别选择 CSV 文件和输出目录
 if CATEGORY == "fraud":
-    csv_file = os.path.join(TEXT_DIR, "诈骗话术.csv")
+    csv_file = os.path.join(TEXT_DIR, "fraud_utterances.csv")
     output_dir = FRAUD_DIR
     prefix = ""
 else:
-    csv_file = os.path.join(TEXT_DIR, "电话广告话术.csv")
+    csv_file = os.path.join(TEXT_DIR, "ad_utterances.csv")
     output_dir = AD_DIR
     prefix = "ad_"
 
@@ -30,7 +29,7 @@ async def fix_one():
     safe_category = category.replace("/", "_").replace(" ", "")
     filename = os.path.join(output_dir, f"{prefix}{INDEX:03d}_{safe_category}.mp3")
 
-    print(f"🔧 重新生成第 {INDEX} 条（{CATEGORY}）")
+    print(f"重新生成第 {INDEX} 条（{CATEGORY}）")
     print(f"  话术: {text[:30]}...")
     print(f"  音色: {voice}")
     print(f"  保存到: {filename}")

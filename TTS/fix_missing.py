@@ -11,13 +11,10 @@ MIN_FILE_SIZE = 5000  # 小于5KB视为损坏
 # ===========================
 
 def is_valid_audio(filepath):
-    """检查音频文件是否有效（通过文件大小判断）"""
     if not os.path.exists(filepath):
         return False
     size = os.path.getsize(filepath)
-    if size < MIN_FILE_SIZE:
-        return False
-    return True
+    return size >= MIN_FILE_SIZE
 
 async def check_and_generate(csv_name, output_dir, prefix="", label=""):
     csv_path = os.path.join(TEXT_DIR, csv_name)
@@ -25,7 +22,6 @@ async def check_and_generate(csv_name, output_dir, prefix="", label=""):
     df = pd.read_csv(csv_path, encoding="gbk")
     semaphore = asyncio.Semaphore(SEMAPHORE_LIMIT)
 
-    # 检查缺失或损坏的文件
     need_regenerate = []
     for i, row in df.iterrows():
         category = row["type"].replace("/", "_").replace(" ", "")
@@ -34,10 +30,10 @@ async def check_and_generate(csv_name, output_dir, prefix="", label=""):
             need_regenerate.append((i, row, filename))
 
     if not need_regenerate:
-        print(f"{label}：所有 {len(df)} 条音频都有效（大小 > {MIN_FILE_SIZE//1024}KB），无需补全。")
+        print(f"{label}：所有 {len(df)} 条音频都有效（> {MIN_FILE_SIZE//1024}KB），无需补全。")
         return
 
-    print(f"{label}：共 {len(df)} 条，其中 {len(need_regenerate)} 条缺失或损坏（小于 {MIN_FILE_SIZE//1024}KB），开始重新生成...")
+    print(f"{label}：共 {len(df)} 条，其中 {len(need_regenerate)} 条缺失或损坏，开始重新生成...")
 
     async def generate_one(i, row, filename, retries=3):
         text = row["text"]
@@ -47,12 +43,11 @@ async def check_and_generate(csv_name, output_dir, prefix="", label=""):
                 async with semaphore:
                     communicate = edge_tts.Communicate(text, voice)
                     await communicate.save(filename)
-                    # 检查生成后的文件大小
                     if os.path.exists(filename) and os.path.getsize(filename) >= MIN_FILE_SIZE:
                         print(f"  ✅ 重新生成 [{i+1}/{len(df)}] {os.path.basename(filename)}")
                         return
                     else:
-                        print(f"  ⚠️ [{i+1}/{len(df)}] 文件太小，可能损坏，重试中...")
+                        print(f"  ⚠️ [{i+1}/{len(df)}] 文件太小，重试中...")
                         if attempt < retries - 1:
                             await asyncio.sleep(2)
             except Exception as e:
@@ -68,9 +63,9 @@ async def check_and_generate(csv_name, output_dir, prefix="", label=""):
 
 async def main():
     if CATEGORY in ["fraud", "both"]:
-        await check_and_generate("诈骗话术.csv", FRAUD_DIR, prefix="", label="诈骗音频")
+        await check_and_generate("fraud_utterances.csv", FRAUD_DIR, prefix="", label="诈骗音频")
     if CATEGORY in ["ad", "both"]:
-        await check_and_generate("电话广告话术.csv", AD_DIR, prefix="ad_", label="广告音频")
+        await check_and_generate("ad_utterances.csv", AD_DIR, prefix="ad_", label="广告音频")
 
     print("所有补全任务完成")
 
