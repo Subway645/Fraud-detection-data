@@ -3,10 +3,10 @@ import librosa
 import soundfile as sf
 import numpy as np
 import pandas as pd
-from config import TEXT_DIR, FRAUD_DIR, AD_DIR
+from config import TEXT_DIR, FRAUD_DIR, AD_DIR, NORMAL_DIR
 
 # ========== 配置区 ==========
-CATEGORY = "both"  # "fraud" / "ad" / "both"
+CATEGORY = "all"  # "fraud" / "ad" / "normal" / "all"
 # ===========================
 
 def add_reverb(y, sr, strength=0.5):
@@ -104,13 +104,17 @@ def process_series(csv_name, audio_dir, prefix="", label=""):
 
 if __name__ == "__main__":
     CATEGORIES = {
-        "fraud": {"dir": FRAUD_DIR, "label": "Fraud Audio"},
-        "ad": {"dir": AD_DIR, "label": "Ad Audio"},
+        "fraud": {"dir": FRAUD_DIR, "csv": "fraud_utterances.csv", "prefix": "", "label": "Fraud Audio"},
+        "ad": {"dir": AD_DIR, "csv": "ad_utterances.csv", "prefix": "ad_", "label": "Ad Audio"},
+        "normal": {"dir": NORMAL_DIR, "csv": "normal_utterances.csv", "prefix": "normal_", "label": "Normal Audio"},
     }
 
-    if CATEGORY in ["fraud", "both"]:
-        process_series("fraud_utterances.csv", FRAUD_DIR, prefix="", label="Fraud Audio")
-    if CATEGORY in ["ad", "both"]:
-        process_series("ad_utterances.csv", AD_DIR, prefix="ad_", label="Ad Audio")
+    for key, cfg in CATEGORIES.items():
+        if CATEGORY in [key, "both", "all"]:
+            process_series(cfg["csv"], cfg["dir"], prefix=cfg["prefix"], label=cfg["label"])
+        elif CATEGORY == "both" and key == "normal":
+            pass  # "both" only does fraud+ad for backward compat
+        elif CATEGORY == "all":
+            pass  # handled by "all" above
 
     print("\n所有后期处理任务完成！")

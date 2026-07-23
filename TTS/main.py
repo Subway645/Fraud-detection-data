@@ -18,9 +18,15 @@ CATEGORIES = {
         "prefix": "ad_",
         "label": "Ad Audio"
     },
+    "normal": {
+        "csv": "normal_utterances.csv",
+        "dir": os.path.join(AUDIO_DIR, "normal_audio"),
+        "prefix": "normal_",
+        "label": "Normal Audio"
+    },
 }
 
-SELECTED = ["fraud"]  # 可选 "fraud", "ad"，或全选
+SELECTED = ["fraud", "ad"]  # 可选 "fraud", "ad", "normal"，或全选 ["fraud", "ad", "normal"]
 SEMAPHORE_LIMIT = 10
 # ===========================
 

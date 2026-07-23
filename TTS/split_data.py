@@ -13,6 +13,8 @@ def split_dataset(csv_name):
         folder_name = "fraud"
     elif "ad" in csv_name:
         folder_name = "ad"
+    elif "normal" in csv_name:
+        folder_name = "normal"
     else:
         folder_name = "other"
 
@@ -42,4 +44,5 @@ def split_dataset(csv_name):
 if __name__ == "__main__":
     split_dataset("fraud_utterances.csv")
     split_dataset("ad_utterances.csv")
+    split_dataset("normal_utterances.csv")
     print("所有数据集划分完成！")

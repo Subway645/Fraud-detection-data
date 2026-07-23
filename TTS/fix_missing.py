@@ -2,10 +2,10 @@ import edge_tts
 import asyncio
 import os
 import pandas as pd
-from config import TEXT_DIR, FRAUD_DIR, AD_DIR
+from config import TEXT_DIR, FRAUD_DIR, AD_DIR, NORMAL_DIR
 
 # ========== 配置区 ==========
-CATEGORY = "both"  # "fraud" / "ad" / "both"
+CATEGORY = "normal"  # "fraud" / "ad" / "normal" / "all"
 SEMAPHORE_LIMIT = 8
 MIN_FILE_SIZE = 5000  # 小于5KB视为损坏
 # ===========================
@@ -62,10 +62,12 @@ async def check_and_generate(csv_name, output_dir, prefix="", label=""):
     print(f"{label} 补全完成")
 
 async def main():
-    if CATEGORY in ["fraud", "both"]:
+    if CATEGORY in ["fraud", "both", "all"]:
         await check_and_generate("fraud_utterances.csv", FRAUD_DIR, prefix="", label="诈骗音频")
-    if CATEGORY in ["ad", "both"]:
+    if CATEGORY in ["ad", "both", "all"]:
         await check_and_generate("ad_utterances.csv", AD_DIR, prefix="ad_", label="广告音频")
+    if CATEGORY in ["normal", "all"]:
+        await check_and_generate("normal_utterances.csv", NORMAL_DIR, prefix="normal_", label="正常音频")
 
     print("所有补全任务完成")
 
