@@ -7,6 +7,7 @@ TEXT_DIR = os.path.join(BASE_DIR, "text_data")
 AUDIO_DIR = os.path.join(BASE_DIR, "audio_data")
 FRAUD_DIR = os.path.join(AUDIO_DIR, "fraud_audio")
 AD_DIR = os.path.join(AUDIO_DIR, "ad_audio")
+NORMAL_DIR = os.path.join(AUDIO_DIR, "normal_audio")
 # ========== 数据划分配置 ==========
 SPLIT_OUTPUT_DIR = os.path.join(TEXT_DIR, "splits")
 TRAIN_RATIO = 0.7

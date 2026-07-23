@@ -2,21 +2,23 @@ import edge_tts
 import asyncio
 import pandas as pd
 import os
-from config import TEXT_DIR, FRAUD_DIR, AD_DIR
+from config import TEXT_DIR, FRAUD_DIR, AD_DIR, NORMAL_DIR
 
 # ===== 在这里修改 =====
-CATEGORY = "ad"      # "fraud" 或 "ad"
-INDEX = 1
+CATEGORY = "normal"      # "fraud" / "ad" / "normal"
+INDEX = 7
 # =====================
 
-if CATEGORY == "fraud":
-    csv_file = os.path.join(TEXT_DIR, "fraud_utterances.csv")
-    output_dir = FRAUD_DIR
-    prefix = ""
-else:
-    csv_file = os.path.join(TEXT_DIR, "ad_utterances.csv")
-    output_dir = AD_DIR
-    prefix = "ad_"
+CATEGORY_CONFIG = {
+    "fraud":  {"csv": os.path.join(TEXT_DIR, "fraud_utterances.csv"),  "dir": FRAUD_DIR,  "prefix": ""},
+    "ad":     {"csv": os.path.join(TEXT_DIR, "ad_utterances.csv"),     "dir": AD_DIR,     "prefix": "ad_"},
+    "normal": {"csv": os.path.join(TEXT_DIR, "normal_utterances.csv"), "dir": NORMAL_DIR, "prefix": "normal_"},
+}
+
+cfg = CATEGORY_CONFIG[CATEGORY]
+csv_file = cfg["csv"]
+output_dir = cfg["dir"]
+prefix = cfg["prefix"]
 
 df = pd.read_csv(csv_file, encoding="gbk")
 
