@@ -6,7 +6,7 @@ import pandas as pd
 from config import TEXT_DIR, FRAUD_DIR, AD_DIR, NORMAL_DIR
 
 # ========== 配置区 ==========
-CATEGORY = "all"  # "fraud" / "ad" / "normal" / "all"
+CATEGORY = "ad"  # "fraud" / "ad" / "normal" / "all"
 # ===========================
 
 def add_reverb(y, sr, strength=0.5):

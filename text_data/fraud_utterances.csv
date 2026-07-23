@@ -41,7 +41,7 @@ text,label,type,voice,augment_reverb,augment_noise,augment_speed,augment_low_qua
 借钱凑一下吧，赚笔大的就完事了,fraud,杀猪盘诈骗,zh-CN-YunxiNeural,0.04,0.0,1.05,0.1,0.95,0
 请考虑下我们和父母的未来,fraud,杀猪盘诈骗,zh-CN-XiaoxiaoNeural,0.07,0.0,1.0,0.1,0.8,1
 成为VIP可以赚更多钱,fraud,杀猪盘诈骗,zh-CN-XiaoyiNeural,0.04,0.0,1.1,0.0,1.0,1
-再贷一点吧，下把赢了就翻盘,fraud,杀猪盘诈骗,zh-CN-YunxiNeural,0.05,0.0,1.1,0.1,1.0,0
+再贷一点吧，下把赢了就翻盘,fraud,网络赌博诈骗,zh-CN-YunxiNeural,0.05,0.0,1.1,0.1,1.0,0
 我不方便视频，以后再见面,fraud,杀猪盘诈骗,zh-CN-XiaoxiaoNeural,0.08,0.003,1.0,0.3,0.8,1
 我能骗你什么呢？,fraud,杀猪盘诈骗,zh-CN-XiaoyiNeural,0.06,0.0,1.05,0.1,0.9,1
 有紧急情况，把聊天记录全删掉,fraud,杀猪盘诈骗,zh-CN-XiaoxiaoNeural,0.06,0.0,1.2,0.1,1.0,1
@@ -57,14 +57,14 @@ text,label,type,voice,augment_reverb,augment_noise,augment_speed,augment_low_qua
 小哥哥，裸聊吗？,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.05,0.003,1.2,0.2,0.9,2
 你刚才裸聊的视频我们已经录下来了,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.25,0.3,1.2,0
 你通讯录里几百号人我都拿到了，不想丢人就配合,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.04,0.0,1.25,0.4,1.3,0
-破财免灾的道理懂吧，花点钱把这事了了,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.2,0.3,1.2,0
+破财免灾的道理懂吧，花点钱把这事了了，不然你的裸聊视频就发你通讯录,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.2,0.3,1.2,0
 先转2000元安抚费，否则视频会群发出去,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.05,0.0,1.25,0.3,1.3,0
 我们有你的手机通讯录和裸聊视频,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.03,0.0,1.2,0.4,1.2,0
-赶紧转钱，收到就删，别给自己找麻烦,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.25,0.3,1.3,0
+赶紧转钱，收到就把你的视频删了，别给自己找麻烦,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.25,0.3,1.3,0
 不给钱就让你身败名裂,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.01,0.0,1.25,0.4,1.4,0
 系统自动处理，钱到账视频就删，别耍花样,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.03,0.0,1.2,0.3,1.2,0
 你通讯录里的人都收到了，你还不转钱？,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.25,0.4,1.4,0
-给你最后十分钟，不然你同事家人都会收到,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.04,0.0,1.35,0.4,1.55,0
+给你最后十分钟，不然你那些裸聊视频会发给你同事和家人,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.04,0.0,1.35,0.4,1.55,0
 先支付删除费1888元，保证视频彻底删除,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.05,0.0,1.2,0.3,1.2,0
 你家里人已经看到照片了，再不处理后果自负,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.25,0.4,1.4,0
 下载这个直播软件，可以和我视频互动,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.01,0.005,1.15,0.2,1.0,2
@@ -230,8 +230,8 @@ POS机押金返还，点击链接领取,fraud,冒充银行诈骗,zh-CN-YunyangNeural,0.08,0.0,1.15
 特殊服务需要先充值会员卡,fraud,色情诈骗,zh-CN-XiaoyiNeural,0.04,0.0,1.05,0.1,0.85,1
 您的裸聊视频和通讯录都在我们手上,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.05,0.0,1.25,0.4,1.3,0
 不转账就把视频发给你的通讯录好友,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.03,0.0,1.25,0.4,1.3,0
-花钱消灾，这事只有你自己知道,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.2,0.3,1.2,0
-我给你的家人打电话了，还不转钱？,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.05,0.0,1.25,0.4,1.4,0
+花钱消灾吧，视频删了这事只有你自己知道,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.02,0.0,1.2,0.3,1.2,0
+我给你的家人打过电话了，你的裸聊照片他们都收到了，还不转钱？,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.05,0.0,1.25,0.4,1.4,0
 最后警告，半小时内不转就全网曝光你的视频,fraud,裸聊敲诈,zh-CN-YunjianNeural,0.01,0.0,1.35,0.4,1.5,0
 下载这个软件可以破解对方手机,fraud,黑客诈骗,zh-CN-YunxiNeural,0.03,0.003,1.15,0.1,1.0,0
 我查到对方位置了，需要付费获取,fraud,黑客诈骗,zh-CN-YunxiNeural,0.04,0.0,1.2,0.1,1.05,0
@@ -329,3 +329,9 @@ ETC通行费电子发票申请已逾期可以补开补开需要验证一次身份信息,fraud,冒充ETC诈骗,zh
 央行刚批复的数字人民币试点项目今天开始原始股认购起投一千块收益翻倍,fraud,虚假投资理财诈骗,zh-CN-XiaoyiNeural,0.09,0.00,1.07,0.05,1.04,0
 你好我是中央电视台非常六加一栏目组的你的手机号在我们的幸运抽奖中被抽中了二等奖奖金八万,fraud,中奖诈骗,zh-CN-XiaoxiaoNeural,0.08,0.005,1.16,0.05,0.9,1
 想查老公的微信记录吗我这边有技术手段提供部分截图先确认满意再付款,fraud,黑客诈骗,zh-CN-YunxiaNeural,0.04,0.003,1.05,0.00,1.05,1
+我是XX财富管理中心的活动专员，今天联系您是因为有一只打新基金收益特别高只对VIP开放,fraud,虚假投资理财诈骗,zh-CN-YunxiNeural,0.07,0.00,1.06,0.00,0.92,1
+我是市中院执行庭的，有一份关于您的执行通知书被退回需要核对收件地址请问您的住址是XX路XX号吗,fraud,冒充公检法人员诈骗,zh-CN-XiaoyiNeural,0.06,0.003,1.14,0.10,0.91,0
+我是您之前在XX理财博览会上咨询过的理财顾问，最近正好有个稳赚的产品推荐过来我记得您说在找好的投资渠道,fraud,杀猪盘诈骗,zh-CN-YunjianNeural,0.04,0.00,1.07,0.00,1.07,-1
+这个平台收益真的很高我自己投了二十万每天都能看到涨,fraud,杀猪盘诈骗,zh-CN-YunyangNeural,0.06,0.00,1.05,0.00,1.05,0
+你不相信的话先拿五百块试一下我保证你赚了之后再考虑加大投入,fraud,杀猪盘诈骗,zh-CN-YunxiaNeural,0.06,0.00,1.19,0.05,0.94,1
+这个理财产品是内部渠道一般人买不到我看在咱俩的关系上才告诉你的,fraud,杀猪盘诈骗,zh-CN-YunjianNeural,0.05,0.003,1.16,0.00,0.93,0

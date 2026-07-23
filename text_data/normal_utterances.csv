@@ -442,3 +442,4 @@ text,label,type,voice,augment_reverb,augment_noise,augment_speed,augment_low_qua
 楼下刚才有个穿西装的说是燃气公司的要上门检查管道我说要看他工作证他不给看你们注意一下,normal,正常通话,zh-CN-YunxiNeural,0.05,0.003,1.18,0.10,1.05,0
 你这个月的信用卡还了没有我收到银行的短信说你已经逾期三天了,normal,正常通话,zh-CN-YunxiaNeural,0.09,0.00,1.06,0.00,0.91,0
 有人冒充我们公司的名义在外面跟人签合同你们收到任何消息都不要理会已经报警了,normal,正常通话,zh-CN-YunjianNeural,0.08,0.005,1.11,0.00,0.98,1
+刚才有个人来公司说是你的律师让我们提供你的社保号我说不认识他不给,normal,同事沟通,zh-CN-YunjianNeural,0.03,0.00,1.18,0.00,0.91,0

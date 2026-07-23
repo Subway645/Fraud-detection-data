@@ -5,8 +5,8 @@ import os
 from config import TEXT_DIR, FRAUD_DIR, AD_DIR, NORMAL_DIR
 
 # ===== 在这里修改 =====
-CATEGORY = "normal"      # "fraud" / "ad" / "normal"
-INDEX = 7
+CATEGORY = "ad"      # "fraud" / "ad" / "normal"
+INDEX = 1
 # =====================
 
 CATEGORY_CONFIG = {
