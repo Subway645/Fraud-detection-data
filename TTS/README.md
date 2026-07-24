@@ -26,10 +26,10 @@ pip install edge-tts pandas librosa soundfile numpy scikit-learn
 
 | 类别 | CSV 文件 | 条数 | label | type 种类 |
 |------|----------|------|-------|----------|
-| 诈骗 | fraud_utterances.csv | 255 | fraud | 28 种 |
-| 广告 | ad_utterances.csv | 180 | ad | 14 种 |
-| 正常 | normal_utterances.csv | 435 | normal | 13 种 |
-| **合计** | | **870** | | |
+| 诈骗 | fraud_utterances.csv | 368 | fraud | 28 种 |
+| 广告 | ad_utterances.csv | 270 | ad | 14 种 |
+| 正常 | normal_utterances.csv | 470 | normal | 2 种 |
+| **合计** | | **1108** | | |
 
 ### CSV 列说明
 
@@ -180,9 +180,9 @@ TEST_RATIO  = 0.15
 
 ```bash
 # 1. 准备 CSV（已就绪）
-#    text_data/fraud_utterances.csv   255条诈骗
-#    text_data/ad_utterances.csv      180条广告
-#    text_data/normal_utterances.csv  435条正常
+#    text_data/fraud_utterances.csv   368条诈骗
+#    text_data/ad_utterances.csv      270条广告
+#    text_data/normal_utterances.csv  470条正常
 
 # 2. 批量生成原始音频（按需选择）
 python main.py    # 改 SELECTED = ["fraud", "ad", "normal"]

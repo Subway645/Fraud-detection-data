@@ -26,8 +26,8 @@ CATEGORIES = {
     },
 }
 
-SELECTED = ["fraud", "ad"]  # 可选 "fraud", "ad", "normal"，或全选 ["fraud", "ad", "normal"]
-SEMAPHORE_LIMIT = 10
+SELECTED = ["normal"]  # 可选 "fraud", "ad", "normal"，或全选 ["fraud", "ad", "normal"]
+SEMAPHORE_LIMIT = 20
 # ===========================
 
 async def generate_series(series_name, config, retries=3):
