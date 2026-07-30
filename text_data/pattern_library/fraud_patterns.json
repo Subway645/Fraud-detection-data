@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.2",
     "date": "2026-07-30",
     "total_types": 28,
     "groups": {
@@ -40,7 +40,8 @@
         "黑客诈骗",
         "网络诈骗"
       ]
-    }
+    },
+    "changelog": "审计修复：补关键词、修复权重、删除碎片词"
   },
   "patterns": {
     "冒充公检法人员诈骗": {
@@ -101,23 +102,86 @@
         }
       ],
       "keywords": [
-        "公安局",
-        "派出所",
-        "民警",
-        "拘留",
-        "逮捕",
-        "通缉",
-        "洗钱",
-        "安全账户",
-        "涉案",
-        "保密",
-        "中央督办",
-        "冻结",
-        "涉嫌洗钱",
-        "刑事",
-        "银行卡",
-        "犯罪活动",
-        "笔录"
+        {
+          "word": "公安局",
+          "weight": "weak"
+        },
+        {
+          "word": "派出所",
+          "weight": "weak"
+        },
+        {
+          "word": "民警",
+          "weight": "weak"
+        },
+        {
+          "word": "拘留",
+          "weight": "strong"
+        },
+        {
+          "word": "逮捕",
+          "weight": "strong"
+        },
+        {
+          "word": "通缉",
+          "weight": "strong"
+        },
+        {
+          "word": "洗钱",
+          "weight": "strong"
+        },
+        {
+          "word": "安全账户",
+          "weight": "strong"
+        },
+        {
+          "word": "涉案",
+          "weight": "weak"
+        },
+        {
+          "word": "保密",
+          "weight": "weak"
+        },
+        {
+          "word": "中央督办",
+          "weight": "strong"
+        },
+        {
+          "word": "冻结",
+          "weight": "weak"
+        },
+        {
+          "word": "涉嫌洗钱",
+          "weight": "strong"
+        },
+        {
+          "word": "刑事",
+          "weight": "weak"
+        },
+        {
+          "word": "银行卡",
+          "weight": "weak"
+        },
+        {
+          "word": "犯罪活动",
+          "weight": "medium"
+        },
+        {
+          "word": "笔录",
+          "weight": "weak"
+        },
+        {
+          "word": "资金清查",
+          "weight": "strong"
+        },
+        {
+          "word": "不被起诉",
+          "weight": "strong"
+        },
+        {
+          "word": "证明清白",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "虚假征信诈骗",
@@ -163,18 +227,62 @@
         }
       ],
       "keywords": [
-        "银行",
-        "冻结",
-        "盗刷",
-        "安全账户",
-        "解冻",
-        "验证",
-        "额度",
-        "信用卡",
-        "逾期",
-        "POS机",
-        "贷款审批",
-        "信用卡逾期"
+        {
+          "word": "银行",
+          "weight": "weak"
+        },
+        {
+          "word": "冻结",
+          "weight": "weak"
+        },
+        {
+          "word": "盗刷",
+          "weight": "strong"
+        },
+        {
+          "word": "安全账户",
+          "weight": "strong"
+        },
+        {
+          "word": "解冻",
+          "weight": "strong"
+        },
+        {
+          "word": "验证",
+          "weight": "weak"
+        },
+        {
+          "word": "额度",
+          "weight": "weak"
+        },
+        {
+          "word": "信用卡",
+          "weight": "weak"
+        },
+        {
+          "word": "逾期",
+          "weight": "weak"
+        },
+        {
+          "word": "POS机",
+          "weight": "weak"
+        },
+        {
+          "word": "贷款审批",
+          "weight": "weak"
+        },
+        {
+          "word": "信用卡逾期",
+          "weight": "weak"
+        },
+        {
+          "word": "被限制使用",
+          "weight": "strong"
+        },
+        {
+          "word": "账户异常",
+          "weight": "medium"
+        }
       ],
       "confusable_with": [
         "虚假征信诈骗",
@@ -211,16 +319,46 @@
         }
       ],
       "keywords": [
-        "营业执照",
-        "年报",
-        "罚款",
-        "工商",
-        "年审",
-        "异常",
-        "投诉",
-        "滞纳金",
-        "法人信息",
-        "商标抢注"
+        {
+          "word": "营业执照",
+          "weight": "weak"
+        },
+        {
+          "word": "年报",
+          "weight": "weak"
+        },
+        {
+          "word": "罚款",
+          "weight": "strong"
+        },
+        {
+          "word": "工商",
+          "weight": "weak"
+        },
+        {
+          "word": "年审",
+          "weight": "weak"
+        },
+        {
+          "word": "异常",
+          "weight": "weak"
+        },
+        {
+          "word": "投诉",
+          "weight": "weak"
+        },
+        {
+          "word": "滞纳金",
+          "weight": "strong"
+        },
+        {
+          "word": "法人信息",
+          "weight": "strong"
+        },
+        {
+          "word": "商标抢注",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "冒充网信部门诈骗"
@@ -249,16 +387,62 @@
         }
       ],
       "keywords": [
-        "网信办",
-        "净网",
-        "公安部网安",
-        "备案",
-        "违规",
-        "注销",
-        "举报",
-        "ICP",
-        "信息泄露",
-        "网络安全审查"
+        {
+          "word": "网信办",
+          "weight": "weak"
+        },
+        {
+          "word": "净网",
+          "weight": "medium"
+        },
+        {
+          "word": "公安部网安",
+          "weight": "weak"
+        },
+        {
+          "word": "备案",
+          "weight": "weak"
+        },
+        {
+          "word": "违规",
+          "weight": "weak"
+        },
+        {
+          "word": "注销",
+          "weight": "weak"
+        },
+        {
+          "word": "举报",
+          "weight": "weak"
+        },
+        {
+          "word": "ICP",
+          "weight": "weak"
+        },
+        {
+          "word": "信息泄露",
+          "weight": "weak"
+        },
+        {
+          "word": "网络安全审查",
+          "weight": "weak"
+        },
+        {
+          "word": "网站备案",
+          "weight": "strong"
+        },
+        {
+          "word": "ICP备案",
+          "weight": "strong"
+        },
+        {
+          "word": "注销备案",
+          "weight": "strong"
+        },
+        {
+          "word": "违法内容",
+          "weight": "medium"
+        }
       ],
       "confusable_with": [
         "冒充工商诈骗",
@@ -294,16 +478,58 @@
         }
       ],
       "keywords": [
-        "运营商",
-        "积分",
-        "停机",
-        "通信管理局",
-        "实名认证",
-        "端口",
-        "携号转网",
-        "申诉",
-        "身份被人",
-        "安全风险"
+        {
+          "word": "运营商",
+          "weight": "weak"
+        },
+        {
+          "word": "积分",
+          "weight": "weak"
+        },
+        {
+          "word": "停机",
+          "weight": "weak"
+        },
+        {
+          "word": "通信管理局",
+          "weight": "weak"
+        },
+        {
+          "word": "实名认证",
+          "weight": "weak"
+        },
+        {
+          "word": "端口",
+          "weight": "weak"
+        },
+        {
+          "word": "携号转网",
+          "weight": "weak"
+        },
+        {
+          "word": "申诉",
+          "weight": "weak"
+        },
+        {
+          "word": "身份被人",
+          "weight": "strong"
+        },
+        {
+          "word": "安全风险",
+          "weight": "weak"
+        },
+        {
+          "word": "积分兑换",
+          "weight": "strong"
+        },
+        {
+          "word": "发送诈骗短信",
+          "weight": "strong"
+        },
+        {
+          "word": "兑换积分清零",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "冒充银行诈骗"
@@ -338,15 +564,54 @@
         }
       ],
       "keywords": [
-        "征信",
-        "校园贷",
-        "注销",
-        "额度",
-        "银保监会",
-        "修复",
-        "流水",
-        "网贷",
-        "助学贷未还清"
+        {
+          "word": "征信",
+          "weight": "weak"
+        },
+        {
+          "word": "校园贷",
+          "weight": "weak"
+        },
+        {
+          "word": "注销",
+          "weight": "weak"
+        },
+        {
+          "word": "额度",
+          "weight": "weak"
+        },
+        {
+          "word": "银保监会",
+          "weight": "weak"
+        },
+        {
+          "word": "修复",
+          "weight": "weak"
+        },
+        {
+          "word": "流水",
+          "weight": "weak"
+        },
+        {
+          "word": "网贷",
+          "weight": "weak"
+        },
+        {
+          "word": "助学贷未还清",
+          "weight": "strong"
+        },
+        {
+          "word": "注销校园贷",
+          "weight": "strong"
+        },
+        {
+          "word": "修复征信",
+          "weight": "strong"
+        },
+        {
+          "word": "银保监会",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "冒充公检法人员诈骗",
@@ -385,15 +650,42 @@
         }
       ],
       "keywords": [
-        "ETC",
-        "高速",
-        "通行",
-        "设备",
-        "失效",
-        "认证",
-        "滞纳金",
-        "升级",
-        "绑卡"
+        {
+          "word": "ETC",
+          "weight": "weak"
+        },
+        {
+          "word": "高速",
+          "weight": "weak"
+        },
+        {
+          "word": "通行",
+          "weight": "weak"
+        },
+        {
+          "word": "设备",
+          "weight": "weak"
+        },
+        {
+          "word": "失效",
+          "weight": "strong"
+        },
+        {
+          "word": "认证",
+          "weight": "weak"
+        },
+        {
+          "word": "滞纳金",
+          "weight": "strong"
+        },
+        {
+          "word": "升级",
+          "weight": "weak"
+        },
+        {
+          "word": "绑卡",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -421,17 +713,66 @@
         }
       ],
       "keywords": [
-        "医保",
-        "社保",
-        "盗刷",
-        "补贴",
-        "冻结",
-        "激活",
-        "报销",
-        "黑名单",
-        "个人账户",
-        "暂停",
-        "您的疫苗接种记录"
+        {
+          "word": "医保",
+          "weight": "weak"
+        },
+        {
+          "word": "社保",
+          "weight": "weak"
+        },
+        {
+          "word": "盗刷",
+          "weight": "strong"
+        },
+        {
+          "word": "补贴",
+          "weight": "weak"
+        },
+        {
+          "word": "冻结",
+          "weight": "weak"
+        },
+        {
+          "word": "激活",
+          "weight": "strong"
+        },
+        {
+          "word": "报销",
+          "weight": "weak"
+        },
+        {
+          "word": "黑名单",
+          "weight": "strong"
+        },
+        {
+          "word": "个人账户",
+          "weight": "strong"
+        },
+        {
+          "word": "暂停",
+          "weight": "strong"
+        },
+        {
+          "word": "您的疫苗接种记录",
+          "weight": "strong"
+        },
+        {
+          "word": "被冒用",
+          "weight": "strong"
+        },
+        {
+          "word": "在外地被刷",
+          "weight": "strong"
+        },
+        {
+          "word": "社保卡被冻结",
+          "weight": "strong"
+        },
+        {
+          "word": "医保卡异常",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "补贴诈骗"
@@ -466,13 +807,34 @@
         }
       ],
       "keywords": [
-        "补贴",
-        "领取",
-        "社保",
-        "扶贫",
-        "财政局",
-        "到账",
-        "名额"
+        {
+          "word": "补贴",
+          "weight": "weak"
+        },
+        {
+          "word": "领取",
+          "weight": "weak"
+        },
+        {
+          "word": "社保",
+          "weight": "weak"
+        },
+        {
+          "word": "扶贫",
+          "weight": "strong"
+        },
+        {
+          "word": "财政局",
+          "weight": "strong"
+        },
+        {
+          "word": "到账",
+          "weight": "weak"
+        },
+        {
+          "word": "名额",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "医保诈骗",
@@ -523,29 +885,110 @@
         }
       ],
       "keywords": [
-        "赚钱",
-        "平台",
-        "一起",
-        "稳赚",
-        "漏洞",
-        "内部",
-        "投资",
-        "收益",
-        "老师",
-        "跟着",
-        "网贷",
-        "结婚",
-        "买房",
-        "我在用手机赚外快",
-        "借钱凑首付",
-        "请考虑一下",
-        "成为VIP会员",
-        "我不方便接电话",
-        "我能骗你吗",
-        "有紧急事情",
-        "先小额试试",
-        "先把钱转给我",
-        "你不相信吗"
+        {
+          "word": "赚钱",
+          "weight": "weak"
+        },
+        {
+          "word": "平台",
+          "weight": "weak"
+        },
+        {
+          "word": "一起",
+          "weight": "weak"
+        },
+        {
+          "word": "稳赚",
+          "weight": "strong"
+        },
+        {
+          "word": "漏洞",
+          "weight": "weak"
+        },
+        {
+          "word": "内部",
+          "weight": "weak"
+        },
+        {
+          "word": "投资",
+          "weight": "weak"
+        },
+        {
+          "word": "收益",
+          "weight": "weak"
+        },
+        {
+          "word": "老师",
+          "weight": "weak"
+        },
+        {
+          "word": "跟着",
+          "weight": "weak"
+        },
+        {
+          "word": "网贷",
+          "weight": "weak"
+        },
+        {
+          "word": "结婚",
+          "weight": "weak"
+        },
+        {
+          "word": "买房",
+          "weight": "weak"
+        },
+        {
+          "word": "我在用手机赚外快",
+          "weight": "strong"
+        },
+        {
+          "word": "借钱凑首付",
+          "weight": "strong"
+        },
+        {
+          "word": "请考虑一下",
+          "weight": "weak"
+        },
+        {
+          "word": "成为VIP会员",
+          "weight": "strong"
+        },
+        {
+          "word": "我不方便接电话",
+          "weight": "strong"
+        },
+        {
+          "word": "我能骗你吗",
+          "weight": "weak"
+        },
+        {
+          "word": "有紧急事情",
+          "weight": "strong"
+        },
+        {
+          "word": "先小额试试",
+          "weight": "strong"
+        },
+        {
+          "word": "先把钱转给我",
+          "weight": "strong"
+        },
+        {
+          "word": "你不相信吗",
+          "weight": "weak"
+        },
+        {
+          "word": "高额回报",
+          "weight": "strong"
+        },
+        {
+          "word": "投一百万",
+          "weight": "strong"
+        },
+        {
+          "word": "理财软件",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "虚假投资理财诈骗",
@@ -600,17 +1043,58 @@
         }
       ],
       "keywords": [
-        "视频",
-        "裸聊",
-        "通讯录",
-        "转钱",
-        "删",
-        "最后一次",
-        "发出去",
-        "直播",
-        "身败名裂",
-        "彩信",
-        "你家里"
+        {
+          "word": "视频",
+          "weight": "weak"
+        },
+        {
+          "word": "裸聊",
+          "weight": "strong"
+        },
+        {
+          "word": "通讯录",
+          "weight": "strong"
+        },
+        {
+          "word": "转钱",
+          "weight": "strong"
+        },
+        {
+          "word": "删",
+          "weight": "weak"
+        },
+        {
+          "word": "最后一次",
+          "weight": "strong"
+        },
+        {
+          "word": "发出去",
+          "weight": "strong"
+        },
+        {
+          "word": "直播",
+          "weight": "weak"
+        },
+        {
+          "word": "身败名裂",
+          "weight": "strong"
+        },
+        {
+          "word": "彩信",
+          "weight": "weak"
+        },
+        {
+          "word": "你家里",
+          "weight": "strong"
+        },
+        {
+          "word": "最后的机会",
+          "weight": "strong"
+        },
+        {
+          "word": "后果自负",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -645,15 +1129,42 @@
         }
       ],
       "keywords": [
-        "服务",
-        "定金",
-        "上门",
-        "妹纸",
-        "会员",
-        "见面",
-        "联系方式",
-        "出发",
-        "小哥哥"
+        {
+          "word": "上门服务",
+          "weight": "strong"
+        },
+        {
+          "word": "先付定金",
+          "weight": "strong"
+        },
+        {
+          "word": "充会员卡",
+          "weight": "strong"
+        },
+        {
+          "word": "安全保障费",
+          "weight": "strong"
+        },
+        {
+          "word": "同城交友",
+          "weight": "medium"
+        },
+        {
+          "word": "小姐",
+          "weight": "medium"
+        },
+        {
+          "word": "空姐",
+          "weight": "medium"
+        },
+        {
+          "word": "兼职",
+          "weight": "weak"
+        },
+        {
+          "word": "模特",
+          "weight": "weak"
+        }
       ],
       "confusable_with": []
     },
@@ -694,15 +1205,46 @@
         }
       ],
       "keywords": [
-        "急",
-        "钱",
-        "医院",
-        "派出所",
-        "手术",
-        "私了",
-        "转给我",
-        "这是我",
-        "手头转"
+        {
+          "word": "备用机",
+          "weight": "strong"
+        },
+        {
+          "word": "别告诉我妈",
+          "weight": "strong"
+        },
+        {
+          "word": "这是我小号",
+          "weight": "strong"
+        },
+        {
+          "word": "在外面出事了",
+          "weight": "strong"
+        },
+        {
+          "word": "在派出所",
+          "weight": "medium"
+        },
+        {
+          "word": "私了",
+          "weight": "medium"
+        },
+        {
+          "word": "手头转",
+          "weight": "medium"
+        },
+        {
+          "word": "急",
+          "weight": "weak"
+        },
+        {
+          "word": "手术",
+          "weight": "weak"
+        },
+        {
+          "word": "医院",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "冒充领导诈骗"
@@ -745,20 +1287,62 @@
         }
       ],
       "keywords": [
-        "办公室",
-        "领导",
-        "不方便",
-        "微信",
-        "截图",
-        "垫一下",
-        "明天上午",
-        "机密",
-        "出差临时缺钱",
-        "事关重大",
-        "现在方便吗",
-        "换号码",
-        "用你账户转一下",
-        "急需资金周转"
+        {
+          "word": "办公室",
+          "weight": "weak"
+        },
+        {
+          "word": "领导",
+          "weight": "weak"
+        },
+        {
+          "word": "不方便",
+          "weight": "weak"
+        },
+        {
+          "word": "微信",
+          "weight": "weak"
+        },
+        {
+          "word": "截图",
+          "weight": "weak"
+        },
+        {
+          "word": "垫一下",
+          "weight": "strong"
+        },
+        {
+          "word": "明天上午",
+          "weight": "weak"
+        },
+        {
+          "word": "机密",
+          "weight": "weak"
+        },
+        {
+          "word": "出差临时缺钱",
+          "weight": "strong"
+        },
+        {
+          "word": "事关重大",
+          "weight": "strong"
+        },
+        {
+          "word": "现在方便吗",
+          "weight": "weak"
+        },
+        {
+          "word": "换号码",
+          "weight": "weak"
+        },
+        {
+          "word": "用你账户转一下",
+          "weight": "strong"
+        },
+        {
+          "word": "急需资金周转",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "冒充亲友诈骗"
@@ -816,19 +1400,62 @@
         }
       ],
       "keywords": [
-        "刷单",
-        "返利",
-        "佣金",
-        "垫付",
-        "任务",
-        "日赚",
-        "兼职",
-        "宝妈",
-        "学生",
-        "名额",
-        "联单",
-        "动动手",
-        "系统检测到违规"
+        {
+          "word": "刷单",
+          "weight": "strong"
+        },
+        {
+          "word": "返利",
+          "weight": "strong"
+        },
+        {
+          "word": "佣金",
+          "weight": "strong"
+        },
+        {
+          "word": "垫付",
+          "weight": "strong"
+        },
+        {
+          "word": "任务",
+          "weight": "medium"
+        },
+        {
+          "word": "日赚",
+          "weight": "weak"
+        },
+        {
+          "word": "兼职",
+          "weight": "weak"
+        },
+        {
+          "word": "宝妈",
+          "weight": "weak"
+        },
+        {
+          "word": "学生",
+          "weight": "weak"
+        },
+        {
+          "word": "名额",
+          "weight": "weak"
+        },
+        {
+          "word": "联单",
+          "weight": "weak"
+        },
+        {
+          "word": "动动手",
+          "weight": "weak"
+        },
+        {
+          "word": "系统检测到违规",
+          "weight": "strong"
+        },
+        {
+          "word": "多劳多得",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -877,23 +1504,94 @@
         }
       ],
       "keywords": [
-        "投资",
-        "收益",
-        "原始股",
-        "老师",
-        "充值",
-        "送",
-        "提现",
-        "流水",
-        "翻倍",
-        "涨停板",
-        "内幕",
-        "导师",
-        "保本保息",
-        "先投入一笔",
-        "账户异常",
-        "今天行情好",
-        "群里所有人都赚了"
+        {
+          "word": "投资",
+          "weight": "weak"
+        },
+        {
+          "word": "收益",
+          "weight": "weak"
+        },
+        {
+          "word": "原始股",
+          "weight": "strong"
+        },
+        {
+          "word": "老师",
+          "weight": "weak"
+        },
+        {
+          "word": "充值",
+          "weight": "weak"
+        },
+        {
+          "word": "送",
+          "weight": "weak"
+        },
+        {
+          "word": "提现",
+          "weight": "weak"
+        },
+        {
+          "word": "流水",
+          "weight": "weak"
+        },
+        {
+          "word": "翻倍",
+          "weight": "weak"
+        },
+        {
+          "word": "涨停板",
+          "weight": "strong"
+        },
+        {
+          "word": "内幕",
+          "weight": "weak"
+        },
+        {
+          "word": "导师",
+          "weight": "weak"
+        },
+        {
+          "word": "保本保息",
+          "weight": "strong"
+        },
+        {
+          "word": "先投入一笔",
+          "weight": "medium"
+        },
+        {
+          "word": "账户异常",
+          "weight": "medium"
+        },
+        {
+          "word": "今天行情好",
+          "weight": "medium"
+        },
+        {
+          "word": "群里所有人都赚了",
+          "weight": "medium"
+        },
+        {
+          "word": "原始股配额",
+          "weight": "strong"
+        },
+        {
+          "word": "内部认购",
+          "weight": "strong"
+        },
+        {
+          "word": "稳赚项目",
+          "weight": "strong"
+        },
+        {
+          "word": "内幕消息",
+          "weight": "strong"
+        },
+        {
+          "word": "数字人民币",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "杀猪盘诈骗"
@@ -943,18 +1641,62 @@
         }
       ],
       "keywords": [
-        "中奖",
-        "幸运",
-        "抽中",
-        "奖金",
-        "栏目组",
-        "保证金",
-        "缴税",
-        "个人所得税",
-        "公证费",
-        "先交",
-        "未按时",
-        "您的积分即将清零"
+        {
+          "word": "中奖",
+          "weight": "weak"
+        },
+        {
+          "word": "幸运",
+          "weight": "weak"
+        },
+        {
+          "word": "抽中",
+          "weight": "weak"
+        },
+        {
+          "word": "奖金",
+          "weight": "weak"
+        },
+        {
+          "word": "栏目组",
+          "weight": "weak"
+        },
+        {
+          "word": "保证金",
+          "weight": "strong"
+        },
+        {
+          "word": "缴税",
+          "weight": "weak"
+        },
+        {
+          "word": "个人所得税",
+          "weight": "weak"
+        },
+        {
+          "word": "公证费",
+          "weight": "strong"
+        },
+        {
+          "word": "先交",
+          "weight": "weak"
+        },
+        {
+          "word": "未按时",
+          "weight": "weak"
+        },
+        {
+          "word": "您的积分即将清零",
+          "weight": "weak"
+        },
+        {
+          "word": "恭喜您中奖",
+          "weight": "strong"
+        },
+        {
+          "word": "缴纳税费",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "补贴诈骗"
@@ -994,21 +1736,70 @@
         }
       ],
       "keywords": [
-        "彩票",
-        "赔率",
-        "赛事",
-        "预测",
-        "内幕",
-        "VIP",
-        "返水",
-        "翻倍",
-        "充值",
-        "精准",
-        "再贷一笔",
-        "注册就送",
-        "导师带单",
-        "平台有漏洞",
-        "账户违规"
+        {
+          "word": "彩票",
+          "weight": "weak"
+        },
+        {
+          "word": "赔率",
+          "weight": "weak"
+        },
+        {
+          "word": "赛事",
+          "weight": "weak"
+        },
+        {
+          "word": "预测",
+          "weight": "weak"
+        },
+        {
+          "word": "内幕",
+          "weight": "weak"
+        },
+        {
+          "word": "VIP",
+          "weight": "weak"
+        },
+        {
+          "word": "返水",
+          "weight": "weak"
+        },
+        {
+          "word": "翻倍",
+          "weight": "weak"
+        },
+        {
+          "word": "充值",
+          "weight": "weak"
+        },
+        {
+          "word": "精准",
+          "weight": "weak"
+        },
+        {
+          "word": "再贷一笔",
+          "weight": "strong"
+        },
+        {
+          "word": "注册就送",
+          "weight": "strong"
+        },
+        {
+          "word": "导师带单",
+          "weight": "strong"
+        },
+        {
+          "word": "平台有漏洞",
+          "weight": "strong"
+        },
+        {
+          "word": "账户违规",
+          "weight": "strong"
+        },
+        {
+          "word": "必赢",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "虚假投资理财诈骗"
@@ -1063,17 +1854,58 @@
         }
       ],
       "keywords": [
-        "游戏",
-        "装备",
-        "皮肤",
-        "点券",
-        "账号",
-        "充值",
-        "解锁",
-        "代练",
-        "礼包",
-        "折扣",
-        "您的订单超时"
+        {
+          "word": "游戏",
+          "weight": "weak"
+        },
+        {
+          "word": "装备",
+          "weight": "weak"
+        },
+        {
+          "word": "皮肤",
+          "weight": "weak"
+        },
+        {
+          "word": "点券",
+          "weight": "weak"
+        },
+        {
+          "word": "账号",
+          "weight": "weak"
+        },
+        {
+          "word": "充值",
+          "weight": "weak"
+        },
+        {
+          "word": "解锁",
+          "weight": "weak"
+        },
+        {
+          "word": "代练",
+          "weight": "weak"
+        },
+        {
+          "word": "礼包",
+          "weight": "weak"
+        },
+        {
+          "word": "折扣",
+          "weight": "weak"
+        },
+        {
+          "word": "您的订单超时",
+          "weight": "weak"
+        },
+        {
+          "word": "装备交易诈骗",
+          "weight": "strong"
+        },
+        {
+          "word": "账号被封",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -1130,18 +1962,62 @@
         }
       ],
       "keywords": [
-        "贷款",
-        "免息",
-        "无抵押",
-        "秒到账",
-        "额度",
-        "解冻费",
-        "验资",
-        "征信",
-        "手续费",
-        "保证金",
-        "刷流水",
-        "下载我"
+        {
+          "word": "贷款",
+          "weight": "weak"
+        },
+        {
+          "word": "免息",
+          "weight": "weak"
+        },
+        {
+          "word": "无抵押",
+          "weight": "medium"
+        },
+        {
+          "word": "秒到账",
+          "weight": "weak"
+        },
+        {
+          "word": "额度",
+          "weight": "weak"
+        },
+        {
+          "word": "解冻费",
+          "weight": "strong"
+        },
+        {
+          "word": "验资",
+          "weight": "weak"
+        },
+        {
+          "word": "征信",
+          "weight": "weak"
+        },
+        {
+          "word": "手续费",
+          "weight": "weak"
+        },
+        {
+          "word": "保证金",
+          "weight": "strong"
+        },
+        {
+          "word": "刷流水",
+          "weight": "medium"
+        },
+        {
+          "word": "下载我",
+          "weight": "strong"
+        },
+        {
+          "word": "验证金",
+          "weight": "strong"
+        },
+        {
+          "word": "激活费",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "虚假征信诈骗",
@@ -1198,20 +2074,78 @@
         }
       ],
       "keywords": [
-        "退款",
-        "理赔",
-        "屏幕共享",
-        "加QQ",
-        "验证",
-        "三倍",
-        "丢失",
-        "快递",
-        "坏",
-        "召回",
-        "授权",
-        "您的订单丢失",
-        "误将您设置为代理商",
-        "账户被冻结"
+        {
+          "word": "退款",
+          "weight": "weak"
+        },
+        {
+          "word": "理赔",
+          "weight": "weak"
+        },
+        {
+          "word": "屏幕共享",
+          "weight": "strong"
+        },
+        {
+          "word": "加QQ",
+          "weight": "medium"
+        },
+        {
+          "word": "验证",
+          "weight": "weak"
+        },
+        {
+          "word": "三倍",
+          "weight": "medium"
+        },
+        {
+          "word": "丢失",
+          "weight": "weak"
+        },
+        {
+          "word": "快递",
+          "weight": "weak"
+        },
+        {
+          "word": "坏",
+          "weight": "weak"
+        },
+        {
+          "word": "召回",
+          "weight": "weak"
+        },
+        {
+          "word": "授权",
+          "weight": "weak"
+        },
+        {
+          "word": "您的订单丢失",
+          "weight": "strong"
+        },
+        {
+          "word": "误将您设置为代理商",
+          "weight": "strong"
+        },
+        {
+          "word": "账户被冻结",
+          "weight": "strong"
+        },
+        {
+          "word": "免密支付",
+          "weight": "strong"
+        },
+        {
+          "word": "关闭功能",
+          "weight": "strong"
+        },
+        {
+          "word": "百万保障",
+          "weight": "strong"
+        },
+        {
+          "word": "平台退款诈骗",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "快递诈骗"
@@ -1257,16 +2191,42 @@
         }
       ],
       "keywords": [
-        "快递",
-        "包裹",
-        "清关",
-        "签收",
-        "保管费",
-        "邮费",
-        "退回",
-        "免费送",
-        "倒付",
-        "请确认"
+        {
+          "word": "运费到付",
+          "weight": "strong"
+        },
+        {
+          "word": "清关费",
+          "weight": "strong"
+        },
+        {
+          "word": "检出违禁品",
+          "weight": "strong"
+        },
+        {
+          "word": "支付保管费",
+          "weight": "strong"
+        },
+        {
+          "word": "无人签收",
+          "weight": "medium"
+        },
+        {
+          "word": "免费送",
+          "weight": "medium"
+        },
+        {
+          "word": "改地址费",
+          "weight": "medium"
+        },
+        {
+          "word": "快递",
+          "weight": "weak"
+        },
+        {
+          "word": "包裹",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "冒充网购客服诈骗"
@@ -1297,16 +2257,58 @@
         }
       ],
       "keywords": [
-        "微信",
-        "解封",
-        "验证",
-        "链接",
-        "扫码",
-        "登陆",
-        "举报",
-        "企业微信",
-        "红包",
-        "限制"
+        {
+          "word": "微信",
+          "weight": "weak"
+        },
+        {
+          "word": "解封",
+          "weight": "weak"
+        },
+        {
+          "word": "验证",
+          "weight": "weak"
+        },
+        {
+          "word": "链接",
+          "weight": "weak"
+        },
+        {
+          "word": "扫码",
+          "weight": "weak"
+        },
+        {
+          "word": "登陆",
+          "weight": "weak"
+        },
+        {
+          "word": "举报",
+          "weight": "weak"
+        },
+        {
+          "word": "企业微信",
+          "weight": "weak"
+        },
+        {
+          "word": "红包",
+          "weight": "weak"
+        },
+        {
+          "word": "限制",
+          "weight": "weak"
+        },
+        {
+          "word": "百万保障到期",
+          "weight": "strong"
+        },
+        {
+          "word": "自动续费",
+          "weight": "strong"
+        },
+        {
+          "word": "支付分",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -1339,15 +2341,38 @@
         }
       ],
       "keywords": [
-        "航班",
-        "改签",
-        "延误",
-        "取消",
-        "机票",
-        "航空公司",
-        "特价票",
-        "内部票",
-        "今晚最"
+        {
+          "word": "航班取消",
+          "weight": "strong"
+        },
+        {
+          "word": "机械故障",
+          "weight": "strong"
+        },
+        {
+          "word": "退票手续费",
+          "weight": "strong"
+        },
+        {
+          "word": "延误赔付",
+          "weight": "strong"
+        },
+        {
+          "word": "改签",
+          "weight": "medium"
+        },
+        {
+          "word": "航空公司",
+          "weight": "medium"
+        },
+        {
+          "word": "特价票",
+          "weight": "medium"
+        },
+        {
+          "word": "机票",
+          "weight": "weak"
+        }
       ],
       "confusable_with": []
     },
@@ -1388,18 +2413,74 @@
         }
       ],
       "keywords": [
-        "燃气",
-        "管道",
-        "泄漏",
-        "爆燃",
-        "胶管",
-        "金属",
-        "更换",
-        "检测",
-        "老式",
-        "上门",
-        "表",
-        "普查"
+        {
+          "word": "燃气",
+          "weight": "weak"
+        },
+        {
+          "word": "管道",
+          "weight": "weak"
+        },
+        {
+          "word": "泄漏",
+          "weight": "weak"
+        },
+        {
+          "word": "爆燃",
+          "weight": "weak"
+        },
+        {
+          "word": "胶管",
+          "weight": "weak"
+        },
+        {
+          "word": "金属",
+          "weight": "weak"
+        },
+        {
+          "word": "更换",
+          "weight": "weak"
+        },
+        {
+          "word": "检测",
+          "weight": "weak"
+        },
+        {
+          "word": "老式",
+          "weight": "weak"
+        },
+        {
+          "word": "上门",
+          "weight": "weak"
+        },
+        {
+          "word": "表",
+          "weight": "weak"
+        },
+        {
+          "word": "普查",
+          "weight": "weak"
+        },
+        {
+          "word": "强制更换",
+          "weight": "strong"
+        },
+        {
+          "word": "存在隐患",
+          "weight": "strong"
+        },
+        {
+          "word": "安全阀",
+          "weight": "strong"
+        },
+        {
+          "word": "管道改造收费",
+          "weight": "strong"
+        },
+        {
+          "word": "先缴后返",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "冒充电力诈骗"
@@ -1451,20 +2532,70 @@
         }
       ],
       "keywords": [
-        "供电",
-        "电表",
-        "窃电",
-        "欠费",
-        "停电",
-        "用电",
-        "补贴",
-        "国网",
-        "余额",
-        "退现",
-        "保证金",
-        "抄表",
-        "您的电费余额不足",
-        "电力公司通知"
+        {
+          "word": "供电",
+          "weight": "weak"
+        },
+        {
+          "word": "电表",
+          "weight": "weak"
+        },
+        {
+          "word": "窃电",
+          "weight": "weak"
+        },
+        {
+          "word": "欠费",
+          "weight": "weak"
+        },
+        {
+          "word": "停电",
+          "weight": "weak"
+        },
+        {
+          "word": "用电",
+          "weight": "weak"
+        },
+        {
+          "word": "补贴",
+          "weight": "weak"
+        },
+        {
+          "word": "国网",
+          "weight": "weak"
+        },
+        {
+          "word": "余额",
+          "weight": "weak"
+        },
+        {
+          "word": "退现",
+          "weight": "weak"
+        },
+        {
+          "word": "保证金",
+          "weight": "strong"
+        },
+        {
+          "word": "抄表",
+          "weight": "weak"
+        },
+        {
+          "word": "您的电费余额不足",
+          "weight": "strong"
+        },
+        {
+          "word": "电力公司通知",
+          "weight": "strong"
+        },
+        {
+          "word": "电费退现",
+          "weight": "strong"
+        },
+        {
+          "word": "老旧线路补贴",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "冒充燃气诈骗"
@@ -1499,17 +2630,62 @@
         }
       ],
       "keywords": [
-        "聊天记录",
-        "定位",
-        "破解",
-        "手机",
-        "查",
-        "私信",
-        "技术",
-        "黑客",
-        "尾款",
-        "删除",
-        "恢复"
+        {
+          "word": "聊天记录",
+          "weight": "weak"
+        },
+        {
+          "word": "定位",
+          "weight": "weak"
+        },
+        {
+          "word": "破解",
+          "weight": "weak"
+        },
+        {
+          "word": "手机",
+          "weight": "weak"
+        },
+        {
+          "word": "查",
+          "weight": "weak"
+        },
+        {
+          "word": "私信",
+          "weight": "weak"
+        },
+        {
+          "word": "技术",
+          "weight": "weak"
+        },
+        {
+          "word": "黑客",
+          "weight": "weak"
+        },
+        {
+          "word": "尾款",
+          "weight": "weak"
+        },
+        {
+          "word": "删除",
+          "weight": "weak"
+        },
+        {
+          "word": "恢复",
+          "weight": "weak"
+        },
+        {
+          "word": "雇佣黑客",
+          "weight": "strong"
+        },
+        {
+          "word": "黑进系统",
+          "weight": "strong"
+        },
+        {
+          "word": "付费查询",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -1540,16 +2716,38 @@
         }
       ],
       "keywords": [
-        "宽带",
-        "网络",
-        "WiFi",
-        "IP",
-        "套餐",
-        "网警",
-        "运营商",
-        "境外",
-        "续费",
-        "固件"
+        {
+          "word": "浏览境外网站",
+          "weight": "strong"
+        },
+        {
+          "word": "被网警警告",
+          "weight": "strong"
+        },
+        {
+          "word": "IP地址异常",
+          "weight": "strong"
+        },
+        {
+          "word": "WiFi被破解",
+          "weight": "strong"
+        },
+        {
+          "word": "续费",
+          "weight": "medium"
+        },
+        {
+          "word": "宽带欠费",
+          "weight": "medium"
+        },
+        {
+          "word": "套餐到期",
+          "weight": "medium"
+        },
+        {
+          "word": "运营商",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "冒充通信诈骗"

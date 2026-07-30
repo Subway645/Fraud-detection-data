@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.2",
     "date": "2026-07-30",
     "total_types": 14,
     "groups": {
@@ -22,7 +22,8 @@
         "网约车出行",
         "物流快递"
       ]
-    }
+    },
+    "changelog": "审计修复：补关键词、修复权重"
   },
   "patterns": {
     "保险推销": {
@@ -84,20 +85,62 @@
         }
       ],
       "keywords": [
-        "保险",
-        "人寿",
-        "保单",
-        "养老社区",
-        "重疾",
-        "车险",
-        "保费",
-        "续保",
-        "保障",
-        "保额",
-        "报价",
-        "理赔",
-        "平安健康",
-        "花您一分钟介绍"
+        {
+          "word": "保险",
+          "weight": "weak"
+        },
+        {
+          "word": "人寿",
+          "weight": "weak"
+        },
+        {
+          "word": "保单",
+          "weight": "weak"
+        },
+        {
+          "word": "养老社区",
+          "weight": "weak"
+        },
+        {
+          "word": "重疾",
+          "weight": "weak"
+        },
+        {
+          "word": "车险",
+          "weight": "weak"
+        },
+        {
+          "word": "保费",
+          "weight": "weak"
+        },
+        {
+          "word": "续保",
+          "weight": "weak"
+        },
+        {
+          "word": "保障",
+          "weight": "weak"
+        },
+        {
+          "word": "保额",
+          "weight": "weak"
+        },
+        {
+          "word": "报价",
+          "weight": "weak"
+        },
+        {
+          "word": "理赔",
+          "weight": "weak"
+        },
+        {
+          "word": "平安健康",
+          "weight": "strong"
+        },
+        {
+          "word": "花您一分钟介绍",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "贷款理财"
@@ -164,27 +207,90 @@
         }
       ],
       "keywords": [
-        "体检",
-        "血压",
-        "医疗",
-        "健康",
-        "基因",
-        "养生",
-        "康复",
-        "瑞慈",
-        "爱康国宾",
-        "华大基因",
-        "微基因",
-        "23魔方",
-        "汤臣倍健",
-        "无限极",
-        "固生堂",
-        "高血压",
-        "血糖",
-        "检测报告",
-        "保健品",
-        "基因检测",
-        "中医调理"
+        {
+          "word": "体检",
+          "weight": "weak"
+        },
+        {
+          "word": "血压",
+          "weight": "weak"
+        },
+        {
+          "word": "医疗",
+          "weight": "weak"
+        },
+        {
+          "word": "健康",
+          "weight": "weak"
+        },
+        {
+          "word": "基因",
+          "weight": "weak"
+        },
+        {
+          "word": "养生",
+          "weight": "weak"
+        },
+        {
+          "word": "康复",
+          "weight": "weak"
+        },
+        {
+          "word": "瑞慈",
+          "weight": "medium"
+        },
+        {
+          "word": "爱康国宾",
+          "weight": "medium"
+        },
+        {
+          "word": "华大基因",
+          "weight": "medium"
+        },
+        {
+          "word": "微基因",
+          "weight": "medium"
+        },
+        {
+          "word": "23魔方",
+          "weight": "medium"
+        },
+        {
+          "word": "汤臣倍健",
+          "weight": "medium"
+        },
+        {
+          "word": "无限极",
+          "weight": "medium"
+        },
+        {
+          "word": "固生堂",
+          "weight": "medium"
+        },
+        {
+          "word": "高血压",
+          "weight": "weak"
+        },
+        {
+          "word": "血糖",
+          "weight": "weak"
+        },
+        {
+          "word": "检测报告",
+          "weight": "weak"
+        },
+        {
+          "word": "保健品",
+          "weight": "strong"
+        },
+        {
+          "word": "基因检测",
+          "weight": "strong"
+        },
+        {
+          "word": "中医调理",
+          "weight": "strong"
+        }
       ],
       "confusable_with": [
         "美容整形"
@@ -250,22 +356,70 @@
         }
       ],
       "keywords": [
-        "房子",
-        "开盘",
-        "认筹",
-        "看房",
-        "小区",
-        "楼盘",
-        "学区",
-        "地铁",
-        "首付",
-        "月供",
-        "链家",
-        "贝壳",
-        "出售",
-        "碧桂园",
-        "保利天汇",
-        "融创"
+        {
+          "word": "房子",
+          "weight": "weak"
+        },
+        {
+          "word": "开盘",
+          "weight": "weak"
+        },
+        {
+          "word": "认筹",
+          "weight": "weak"
+        },
+        {
+          "word": "看房",
+          "weight": "weak"
+        },
+        {
+          "word": "小区",
+          "weight": "weak"
+        },
+        {
+          "word": "楼盘",
+          "weight": "weak"
+        },
+        {
+          "word": "学区",
+          "weight": "weak"
+        },
+        {
+          "word": "地铁",
+          "weight": "weak"
+        },
+        {
+          "word": "首付",
+          "weight": "weak"
+        },
+        {
+          "word": "月供",
+          "weight": "weak"
+        },
+        {
+          "word": "链家",
+          "weight": "medium"
+        },
+        {
+          "word": "贝壳",
+          "weight": "medium"
+        },
+        {
+          "word": "出售",
+          "weight": "weak"
+        },
+        {
+          "word": "碧桂园",
+          "weight": "strong"
+        },
+        {
+          "word": "保利天汇",
+          "weight": "strong"
+        },
+        {
+          "word": "融创",
+          "weight": "medium"
+        }
       ],
       "confusable_with": [
         "装修家居"
@@ -336,19 +490,42 @@
         }
       ],
       "keywords": [
-        "手机",
-        "套餐",
-        "宽带",
-        "换新",
-        "电视",
-        "华为",
-        "小米",
-        "iPhone",
-        "联通",
-        "移动",
-        "电信",
-        "流量",
-        "家电"
+        {
+          "word": "运营商套餐升级",
+          "weight": "strong"
+        },
+        {
+          "word": "宽带提速",
+          "weight": "strong"
+        },
+        {
+          "word": "以旧换新补贴",
+          "weight": "strong"
+        },
+        {
+          "word": "华为",
+          "weight": "medium"
+        },
+        {
+          "word": "小米",
+          "weight": "medium"
+        },
+        {
+          "word": "iPhone",
+          "weight": "medium"
+        },
+        {
+          "word": "手机",
+          "weight": "weak"
+        },
+        {
+          "word": "套餐",
+          "weight": "weak"
+        },
+        {
+          "word": "宽带",
+          "weight": "weak"
+        }
       ],
       "confusable_with": []
     },
@@ -415,21 +592,74 @@
         }
       ],
       "keywords": [
-        "家长",
-        "孩子",
-        "课程",
-        "辅导",
-        "考试",
-        "试听",
-        "暑假班",
-        "学而思",
-        "学大",
-        "老师",
-        "培训",
-        "学历",
-        "教育",
-        "中华会计",
-        "东奥"
+        {
+          "word": "家长",
+          "weight": "weak"
+        },
+        {
+          "word": "孩子",
+          "weight": "weak"
+        },
+        {
+          "word": "课程",
+          "weight": "weak"
+        },
+        {
+          "word": "辅导",
+          "weight": "weak"
+        },
+        {
+          "word": "考试",
+          "weight": "weak"
+        },
+        {
+          "word": "试听",
+          "weight": "weak"
+        },
+        {
+          "word": "暑假班",
+          "weight": "weak"
+        },
+        {
+          "word": "学而思",
+          "weight": "medium"
+        },
+        {
+          "word": "学大",
+          "weight": "medium"
+        },
+        {
+          "word": "老师",
+          "weight": "weak"
+        },
+        {
+          "word": "培训",
+          "weight": "weak"
+        },
+        {
+          "word": "学历",
+          "weight": "weak"
+        },
+        {
+          "word": "教育",
+          "weight": "weak"
+        },
+        {
+          "word": "中华会计",
+          "weight": "medium"
+        },
+        {
+          "word": "东奥",
+          "weight": "weak"
+        },
+        {
+          "word": "试听课",
+          "weight": "strong"
+        },
+        {
+          "word": "暑假班",
+          "weight": "strong"
+        }
       ],
       "confusable_with": []
     },
@@ -487,23 +717,33 @@
         }
       ],
       "keywords": [
-        "行程",
-        "报团",
-        "自由行",
-        "机票",
-        "酒店",
-        "旅游",
-        "线路",
-        "定制",
-        "亲子游",
-        "新疆",
-        "专列",
-        "境外游",
-        "国旅",
-        "特价团"
+        {
+          "word": "特价机票",
+          "weight": "strong"
+        },
+        {
+          "word": "自由行定制",
+          "weight": "strong"
+        },
+        {
+          "word": "亲子游套餐",
+          "weight": "strong"
+        },
+        {
+          "word": "报团",
+          "weight": "medium"
+        },
+        {
+          "word": "酒店",
+          "weight": "medium"
+        },
+        {
+          "word": "旅游",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
-        "滴滴出行"
+        "网约车出行"
       ]
     },
     "母婴亲子": {
@@ -567,18 +807,30 @@
         }
       ],
       "keywords": [
-        "孩子",
-        "宝宝",
-        "家长",
-        "早教",
-        "亲子",
-        "育儿",
-        "月子",
-        "母婴",
-        "游泳",
-        "摄影",
-        "体验课",
-        "东方爱婴"
+        {
+          "word": "早教课程",
+          "weight": "strong"
+        },
+        {
+          "word": "月子中心",
+          "weight": "strong"
+        },
+        {
+          "word": "亲子游泳",
+          "weight": "strong"
+        },
+        {
+          "word": "宝宝",
+          "weight": "medium"
+        },
+        {
+          "word": "家长",
+          "weight": "medium"
+        },
+        {
+          "word": "孩子",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "教育培训"
@@ -645,20 +897,30 @@
         }
       ],
       "keywords": [
-        "车险",
-        "4S",
-        "试驾",
-        "二手车",
-        "车展",
-        "报价",
-        "特价",
-        "买车",
-        "丰田",
-        "奥迪",
-        "特斯拉",
-        "比亚迪",
-        "分期",
-        "一汽大众"
+        {
+          "word": "试驾",
+          "weight": "strong"
+        },
+        {
+          "word": "二手车评估",
+          "weight": "strong"
+        },
+        {
+          "word": "特价车源",
+          "weight": "strong"
+        },
+        {
+          "word": "车险",
+          "weight": "medium"
+        },
+        {
+          "word": "4S",
+          "weight": "medium"
+        },
+        {
+          "word": "买车",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "保险推销",
@@ -717,17 +979,30 @@
         }
       ],
       "keywords": [
-        "快递",
-        "寄件",
-        "物流",
-        "上门",
-        "报价",
-        "发货",
-        "电商",
-        "老板",
-        "便宜",
-        "跨境",
-        "日均"
+        {
+          "word": "跨境物流",
+          "weight": "strong"
+        },
+        {
+          "word": "电商发货",
+          "weight": "strong"
+        },
+        {
+          "word": "上门取件",
+          "weight": "strong"
+        },
+        {
+          "word": "寄件",
+          "weight": "medium"
+        },
+        {
+          "word": "物流",
+          "weight": "medium"
+        },
+        {
+          "word": "快递",
+          "weight": "weak"
+        }
       ],
       "confusable_with": []
     },
@@ -795,18 +1070,30 @@
         }
       ],
       "keywords": [
-        "整形",
-        "美容",
-        "皮肤",
-        "医美",
-        "口腔",
-        "眼科",
-        "植发",
-        "面诊",
-        "活动",
-        "项目",
-        "双眼皮",
-        "玻尿酸"
+        {
+          "word": "整形",
+          "weight": "strong"
+        },
+        {
+          "word": "美容",
+          "weight": "strong"
+        },
+        {
+          "word": "植发",
+          "weight": "strong"
+        },
+        {
+          "word": "医美",
+          "weight": "medium"
+        },
+        {
+          "word": "口腔",
+          "weight": "medium"
+        },
+        {
+          "word": "皮肤",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "医疗保健推销"
@@ -876,17 +1163,30 @@
         }
       ],
       "keywords": [
-        "装修",
-        "装饰",
-        "设计",
-        "房子",
-        "样板房",
-        "收房",
-        "套餐",
-        "全包",
-        "方案",
-        "家具",
-        "软装"
+        {
+          "word": "装修公司",
+          "weight": "strong"
+        },
+        {
+          "word": "样板房",
+          "weight": "strong"
+        },
+        {
+          "word": "全屋定制",
+          "weight": "strong"
+        },
+        {
+          "word": "设计",
+          "weight": "medium"
+        },
+        {
+          "word": "家具",
+          "weight": "medium"
+        },
+        {
+          "word": "房子",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "房地产推销"
@@ -947,21 +1247,30 @@
         }
       ],
       "keywords": [
-        "贷款",
-        "额度",
-        "备用金",
-        "信用卡",
-        "利率",
-        "月息",
-        "申请",
-        "审批",
-        "抵押",
-        "房产",
-        "放款",
-        "银行",
-        "公积金",
-        "工号",
-        "资金需求"
+        {
+          "word": "信贷",
+          "weight": "strong"
+        },
+        {
+          "word": "利率优惠",
+          "weight": "strong"
+        },
+        {
+          "word": "房产抵押",
+          "weight": "strong"
+        },
+        {
+          "word": "贷款",
+          "weight": "medium"
+        },
+        {
+          "word": "额度",
+          "weight": "medium"
+        },
+        {
+          "word": "备用金",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "保险推销"
@@ -1030,18 +1339,54 @@
         }
       ],
       "keywords": [
-        "店铺",
-        "曝光",
-        "单量",
-        "美团",
-        "代运营",
-        "外卖",
-        "收银",
-        "排名",
-        "平台",
-        "饿了么",
-        "抽成",
-        "扫码支付"
+        {
+          "word": "店铺",
+          "weight": "weak"
+        },
+        {
+          "word": "曝光",
+          "weight": "weak"
+        },
+        {
+          "word": "单量",
+          "weight": "weak"
+        },
+        {
+          "word": "美团",
+          "weight": "weak"
+        },
+        {
+          "word": "代运营",
+          "weight": "strong"
+        },
+        {
+          "word": "外卖",
+          "weight": "weak"
+        },
+        {
+          "word": "收银",
+          "weight": "weak"
+        },
+        {
+          "word": "排名",
+          "weight": "weak"
+        },
+        {
+          "word": "平台",
+          "weight": "weak"
+        },
+        {
+          "word": "饿了么",
+          "weight": "weak"
+        },
+        {
+          "word": "抽成",
+          "weight": "weak"
+        },
+        {
+          "word": "扫码支付",
+          "weight": "medium"
+        }
       ],
       "confusable_with": []
     },
@@ -1117,28 +1462,94 @@
         }
       ],
       "keywords": [
-        "滴滴",
-        "高德",
-        "哈啰",
-        "首汽",
-        "享道",
-        "T3",
-        "曹操",
-        "美团打车",
-        "百度打车",
-        "花小猪",
-        "司机",
-        "货运",
-        "代驾",
-        "兼职",
-        "跑车",
-        "上线",
-        "平台",
-        "门槛",
-        "奖励",
-        "专车",
-        "抽成",
-        "网约车"
+        {
+          "word": "滴滴",
+          "weight": "weak"
+        },
+        {
+          "word": "高德",
+          "weight": "weak"
+        },
+        {
+          "word": "哈啰",
+          "weight": "weak"
+        },
+        {
+          "word": "首汽",
+          "weight": "medium"
+        },
+        {
+          "word": "享道",
+          "weight": "medium"
+        },
+        {
+          "word": "T3",
+          "weight": "weak"
+        },
+        {
+          "word": "曹操",
+          "weight": "weak"
+        },
+        {
+          "word": "美团打车",
+          "weight": "strong"
+        },
+        {
+          "word": "百度打车",
+          "weight": "strong"
+        },
+        {
+          "word": "花小猪",
+          "weight": "strong"
+        },
+        {
+          "word": "司机",
+          "weight": "weak"
+        },
+        {
+          "word": "货运",
+          "weight": "weak"
+        },
+        {
+          "word": "代驾",
+          "weight": "weak"
+        },
+        {
+          "word": "兼职",
+          "weight": "weak"
+        },
+        {
+          "word": "跑车",
+          "weight": "weak"
+        },
+        {
+          "word": "上线",
+          "weight": "weak"
+        },
+        {
+          "word": "平台",
+          "weight": "weak"
+        },
+        {
+          "word": "门槛",
+          "weight": "weak"
+        },
+        {
+          "word": "奖励",
+          "weight": "weak"
+        },
+        {
+          "word": "专车",
+          "weight": "weak"
+        },
+        {
+          "word": "抽成",
+          "weight": "weak"
+        },
+        {
+          "word": "网约车",
+          "weight": "weak"
+        }
       ],
       "confusable_with": [
         "旅游出行"
