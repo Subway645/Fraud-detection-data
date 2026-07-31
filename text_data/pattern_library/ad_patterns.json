@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.3",
+    "version": "1.4",
     "date": "2026-07-30",
     "total_types": 14,
     "groups": {
@@ -23,7 +23,7 @@
         "物流快递"
       ]
     },
-    "changelog": "v1.3: 基于normal误报实测降级10个词"
+    "changelog": "v1.4: 同步图谱提升的词回keywords"
   },
   "patterns": {
     "保险推销": {

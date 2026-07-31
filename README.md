@@ -8,7 +8,10 @@
 ```
 诈骗电话识别/
 ├── README.md                              ← 当前文件
-├── HANDOFF.md                             ← 交接文档（先读那个）
+├── HANDOFF.md                             ← 交接文档
+├── docs/                                   # 报告素材
+│   ├── 开发日志.md                        ← 技术迭代过程记录
+│   └── 技术素材.xlsx                      ← 创新点/数据资产/里程碑
 │
 ├── TTS/                                   # 语音合成工具链
 │   ├── config.py                          # 全局路径
@@ -16,24 +19,28 @@
 │   ├── post_process.py                    # 音频增强
 │   ├── fix_missing.py                     # 批量修复损坏音频
 │   ├── fix_one.py                         # 修复单条
-│   ├── split_data.py                      # 训练/验证/测试划分
-│   └── README.md                          # TTS 子文档
+│   └──  split_data.py                      # 训练/验证/测试划分
 │
 ├── text_data/                             # 文本数据
 │   ├── fraud_utterances.csv               # 诈骗 368 条
 │   ├── ad_utterances.csv                  # 广告 270 条
 │   ├── normal_utterances.csv              # 正常 470 条
 │   ├── pattern_library/                   # 话术模板库
-│   │   ├── fraud_patterns.json           # 诈骗 v1.3：28种 · 41模板
-│   │   ├── ad_patterns.json              # 广告 v1.3：14种 · 28模板
+│   │   ├── fraud_patterns.json           # 诈骗 v1.4：28种 · 41模板
+│   │   ├── ad_patterns.json              # 广告 v1.4：14种 · 28模板
 │   │   └── normal_patterns.json          # 正常 v1.1
 │   ├── knowledge_graph/                   # 知识图谱
-│   │   ├── entities.csv                  # 实体词典 1089 行
-│   │   └── relations.csv                 # 关系表 1248 行
+│   │   ├── entities.csv                  # 实体词典 1318 行
+│   │   └── relations.csv                 # 关系表 1675 行
 │   └── splits/                            # 训练/验证/测试划分
 │       ├── fraud/
 │       ├── ad/
 │       └── normal/
+│
+├── matcher/                               # 匹配算法 + 隔离评测
+│   ├── matcher.py                        # 生产口径打分（全量词表，含泄漏标注）
+│   ├── isolated_eval.py                  # 严格隔离评测（G层，真实泛化）
+│   └── expand_keywords.py                # 关键词扩展
 │
 └── audio_data/                            # 生成的语音文件
     ├── fraud_audio/ + processed/
@@ -77,7 +84,7 @@ pip install edge-tts pandas librosa soundfile numpy scikit-learn
 
 每种诈骗/广告类型有结构化模板 + 三档权重关键词（strong/medium/weak）。
 
-版本 v1.3（2026.7.31）。三种权重说明：
+版本 v1.4（2026.7.31）。三种权重说明：
 
 | 权重 | 含义 | 匹配规则 |
 |------|------|---------|
@@ -85,12 +92,12 @@ pip install edge-tts pandas librosa soundfile numpy scikit-learn
 | medium | 诈骗常见但日常也可能出现 | ≥2 个同时命中 |
 | weak | 日常高频词 | 不加分，做平滑参考 |
 
-v1.3 统计：
+v1.4 统计：
 
 | 库 | Strong | Medium | Weak | 总计 |
 |----|--------|--------|------|------|
-| 诈骗 | 143 | 27 | 212 | 382 |
-| 广告 | 36 | 33 | 84 | 153 |
+| 诈骗 | 240 | 26 | 213 | 479 |
+| 广告 | 36 | 31 | 86 | 153 |
 
 所有 42 种类型至少 1 个 strong。
 
@@ -98,7 +105,7 @@ v1.3 统计：
 
 ```json
 {
-  "metadata": { "version": "1.3", "groups": { "权威压迫型": [...], ... } },
+  "metadata": { "version": "1.4", "groups": { "权威压迫型": [...], ... } },
   "patterns": {
     "冒充公检法人员诈骗": {
       "group": "权威压迫型",
@@ -135,9 +142,9 @@ v1.3 统计：
 | AdType | 14 | 广告类型 |
 | ScamGroup / AdGroup | 4 + 2 | 大组（权威压迫型等） |
 | Keyword | 77 | ≤2字词，精确匹配 |
-| Phrase | 374 | 2-5字短语，子串匹配 |
+| Phrase | 472 | 2-5字短语，子串匹配 |
 | Utterance | 343 | 完整话术，整句匹配 |
-| Brand | 155 | 机构/品牌名 |
+| Brand | 286 | 机构/品牌名 |
 | Action | 92 | 操作指令 |
 
 子类型按 slot 语义 + 长度判定，匹配算法按子类型用不同策略。
@@ -147,9 +154,19 @@ v1.3 统计：
 | 关系 | 方向 | 含义 | 数量 |
 |------|------|------|------|
 | has_entity | 类型 → Entity | 该类型的模板里有这个词 | 922 |
-| indicates | Entity → 类型 | 听到这个词警惕该类型（仅 strong+medium） | 236 |
+| indicates | Entity → 类型 | 听到这个词警惕该类型（仅 strong+medium） | 663 |
 | belongs_to_group | 类型 → Group | 所属大组 | 42 |
 | confusable_with | 类型 ↔ 类型 | 容易互相混淆（双向） | 48 边 / 24 对 |
+
+
+**indicates 词表构成（656 词）：**
+
+| 来源 | 数量 | 说明 |
+|------|------|------|
+| 模板库人工关键词 | 343 | pattern JSON 里人工设计的 strong/medium 词 |
+| 数据挖掘词 | 313 | 从 utterance 提取的品牌名/短语（如"太平洋人寿""一单返5元"） |
+
+> 注意：数据挖掘词从全量 utterance 提取，因此 `matcher.py` 用全量词表评测的召回率（91%/94%）存在特征构建泄漏，**不是真实泛化能力**。真实泛化见下方验收结果的 G 列（65.2%/53.7%）。
 
 查法：
 
@@ -163,6 +180,18 @@ relations[(relations["relation"]=="has_entity") & (relations["head_name"]=="冒�
 # 两个类型之间容易混淆吗？
 relations[(relations["relation"]=="confusable_with") & (relations["head_name"].isin(["冒充公检法", "虚假征信"]))]
 ```
+
+
+### 验收结果
+
+**两个评测口径：**
+
+| 脚本 | 口径 | fraud召回 | ad召回 | 用途 |
+|------|------|---------|------|------|
+| `matcher.py` evaluate() | 全量 indicates → 全量 utterance | **91.0%** | **93.7%** | 日常检查（含特征泄漏，不宜用于汇报） |
+| `isolated_eval.py` G列 | train构建关键词 → val+test | **65.2%** | **53.7%** | ★真实泛化能力（严格隔离，用于汇报） |
+
+七层隔离评测详见 HANDOFF.md。`matcher.py` 的 91%/94% 高于真实值是因为 indicates 表中的 Brand/Phrase 实体从全量数据提取，存在特征构建泄漏。
 
 ---
 
