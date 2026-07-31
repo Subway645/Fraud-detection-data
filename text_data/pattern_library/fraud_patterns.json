@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.2",
+    "version": "1.3",
     "date": "2026-07-30",
     "total_types": 28,
     "groups": {
@@ -41,7 +41,7 @@
         "网络诈骗"
       ]
     },
-    "changelog": "审计修复：补关键词、修复权重、删除碎片词"
+    "changelog": "v1.3: 基于normal误报实测降级10个词"
   },
   "patterns": {
     "冒充公检法人员诈骗": {
@@ -1131,7 +1131,7 @@
       "keywords": [
         {
           "word": "上门服务",
-          "weight": "strong"
+          "weight": "medium"
         },
         {
           "word": "先付定金",
@@ -1418,7 +1418,7 @@
         },
         {
           "word": "任务",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "日赚",
@@ -2734,11 +2734,11 @@
         },
         {
           "word": "续费",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "宽带欠费",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "套餐到期",

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.2",
+    "version": "1.3",
     "date": "2026-07-30",
     "total_types": 14,
     "groups": {
@@ -23,7 +23,7 @@
         "物流快递"
       ]
     },
-    "changelog": "审计修复：补关键词、修复权重"
+    "changelog": "v1.3: 基于normal误报实测降级10个词"
   },
   "patterns": {
     "保险推销": {
@@ -654,7 +654,7 @@
         },
         {
           "word": "试听课",
-          "weight": "strong"
+          "weight": "medium"
         },
         {
           "word": "暑假班",
@@ -821,11 +821,11 @@
         },
         {
           "word": "宝宝",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "家长",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "孩子",
@@ -1177,7 +1177,7 @@
         },
         {
           "word": "设计",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "家具",
@@ -1261,7 +1261,7 @@
         },
         {
           "word": "贷款",
-          "weight": "medium"
+          "weight": "weak"
         },
         {
           "word": "额度",

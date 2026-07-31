@@ -24,12 +24,12 @@
 │   ├── ad_utterances.csv                  # 广告 270 条
 │   ├── normal_utterances.csv              # 正常 470 条
 │   ├── pattern_library/                   # 话术模板库
-│   │   ├── fraud_patterns.json           # 诈骗 v1.2：28种 · 41模板
-│   │   ├── ad_patterns.json              # 广告 v1.2：14种 · 28模板
+│   │   ├── fraud_patterns.json           # 诈骗 v1.3：28种 · 41模板
+│   │   ├── ad_patterns.json              # 广告 v1.3：14种 · 28模板
 │   │   └── normal_patterns.json          # 正常 v1.1
 │   ├── knowledge_graph/                   # 知识图谱
-│   │   ├── entities.csv                  # 实体词典 1088 行
-│   │   └── relations.csv                 # 关系表 1183 行
+│   │   ├── entities.csv                  # 实体词典 1089 行
+│   │   └── relations.csv                 # 关系表 1248 行
 │   └── splits/                            # 训练/验证/测试划分
 │       ├── fraud/
 │       ├── ad/
@@ -77,7 +77,7 @@ pip install edge-tts pandas librosa soundfile numpy scikit-learn
 
 每种诈骗/广告类型有结构化模板 + 三档权重关键词（strong/medium/weak）。
 
-版本 v1.2（2026.7.30）。三种权重说明：
+版本 v1.3（2026.7.31）。三种权重说明：
 
 | 权重 | 含义 | 匹配规则 |
 |------|------|---------|
@@ -85,12 +85,12 @@ pip install edge-tts pandas librosa soundfile numpy scikit-learn
 | medium | 诈骗常见但日常也可能出现 | ≥2 个同时命中 |
 | weak | 日常高频词 | 不加分，做平滑参考 |
 
-v1.2 统计：
+v1.3 统计：
 
 | 库 | Strong | Medium | Weak | 总计 |
 |----|--------|--------|------|------|
-| 诈骗 | 144 | 28 | 210 | 382 |
-| 广告 | 37 | 34 | 82 | 153 |
+| 诈骗 | 143 | 27 | 212 | 382 |
+| 广告 | 36 | 33 | 84 | 153 |
 
 所有 42 种类型至少 1 个 strong。
 
@@ -98,7 +98,7 @@ v1.2 统计：
 
 ```json
 {
-  "metadata": { "version": "1.2", "groups": { "权威压迫型": [...], ... } },
+  "metadata": { "version": "1.3", "groups": { "权威压迫型": [...], ... } },
   "patterns": {
     "冒充公检法人员诈骗": {
       "group": "权威压迫型",
@@ -133,15 +133,23 @@ v1.2 统计：
 |------|------|------|
 | ScamType | 28 | 诈骗类型 |
 | AdType | 14 | 广告类型 |
-| Entity | 1046 | 关键词 + 模板槽位值（去重合并） |
+| ScamGroup / AdGroup | 4 + 2 | 大组（权威压迫型等） |
+| Keyword | 77 | ≤2字词，精确匹配 |
+| Phrase | 374 | 2-5字短语，子串匹配 |
+| Utterance | 343 | 完整话术，整句匹配 |
+| Brand | 155 | 机构/品牌名 |
+| Action | 92 | 操作指令 |
 
-**三种关系:**
+子类型按 slot 语义 + 长度判定，匹配算法按子类型用不同策略。
+
+**四种关系:**
 
 | 关系 | 方向 | 含义 | 数量 |
 |------|------|------|------|
 | has_entity | 类型 → Entity | 该类型的模板里有这个词 | 922 |
-| indicates | Entity → 类型 | 听到这个词警惕该类型（仅 strong+medium） | 243 |
-| confusable_with | 类型 ↔ 类型 | 容易互相混淆 | 18 |
+| indicates | Entity → 类型 | 听到这个词警惕该类型（仅 strong+medium） | 236 |
+| belongs_to_group | 类型 → Group | 所属大组 | 42 |
+| confusable_with | 类型 ↔ 类型 | 容易互相混淆（双向） | 48 边 / 24 对 |
 
 查法：
 
