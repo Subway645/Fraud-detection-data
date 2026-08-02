@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.4",
+    "version": "1.5",
     "date": "2026-07-30",
     "total_types": 14,
     "groups": {
@@ -23,7 +23,7 @@
         "物流快递"
       ]
     },
-    "changelog": "v1.4: 同步图谱提升的词回keywords"
+    "changelog": "v1.5: 数据扩至600/452后补全关键词(人工审词+品牌词+normal零命中校验)"
   },
   "patterns": {
     "保险推销": {
@@ -139,6 +139,38 @@
         },
         {
           "word": "花您一分钟介绍",
+          "weight": "strong"
+        },
+        {
+          "word": "重疾险",
+          "weight": "strong"
+        },
+        {
+          "word": "养老险",
+          "weight": "strong"
+        },
+        {
+          "word": "宠物险",
+          "weight": "strong"
+        },
+        {
+          "word": "疫苗险",
+          "weight": "strong"
+        },
+        {
+          "word": "意外险",
+          "weight": "medium"
+        },
+        {
+          "word": "保险经纪",
+          "weight": "medium"
+        },
+        {
+          "word": "比价",
+          "weight": "medium"
+        },
+        {
+          "word": "交满返本",
           "weight": "strong"
         }
       ],
@@ -290,6 +322,38 @@
         {
           "word": "中医调理",
           "weight": "strong"
+        },
+        {
+          "word": "氨糖软骨素",
+          "weight": "strong"
+        },
+        {
+          "word": "无创血糖仪",
+          "weight": "strong"
+        },
+        {
+          "word": "老花镜",
+          "weight": "medium"
+        },
+        {
+          "word": "助眠",
+          "weight": "strong"
+        },
+        {
+          "word": "专家解读",
+          "weight": "strong"
+        },
+        {
+          "word": "免费试用",
+          "weight": "medium"
+        },
+        {
+          "word": "中药调理",
+          "weight": "strong"
+        },
+        {
+          "word": "全飞秒",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -419,6 +483,50 @@
         {
           "word": "融创",
           "weight": "medium"
+        },
+        {
+          "word": "新盘",
+          "weight": "strong"
+        },
+        {
+          "word": "特价房",
+          "weight": "strong"
+        },
+        {
+          "word": "学区房",
+          "weight": "strong"
+        },
+        {
+          "word": "写字楼",
+          "weight": "strong"
+        },
+        {
+          "word": "商铺",
+          "weight": "strong"
+        },
+        {
+          "word": "换房",
+          "weight": "medium"
+        },
+        {
+          "word": "换租客",
+          "weight": "medium"
+        },
+        {
+          "word": "湖景盘",
+          "weight": "medium"
+        },
+        {
+          "word": "地铁铺",
+          "weight": "medium"
+        },
+        {
+          "word": "调价",
+          "weight": "medium"
+        },
+        {
+          "word": "三房",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -525,6 +633,54 @@
         {
           "word": "宽带",
           "weight": "weak"
+        },
+        {
+          "word": "以旧换新",
+          "weight": "strong"
+        },
+        {
+          "word": "千兆",
+          "weight": "strong"
+        },
+        {
+          "word": "路由器",
+          "weight": "medium"
+        },
+        {
+          "word": "换屏",
+          "weight": "strong"
+        },
+        {
+          "word": "机顶盒",
+          "weight": "strong"
+        },
+        {
+          "word": "延保",
+          "weight": "medium"
+        },
+        {
+          "word": "样机",
+          "weight": "medium"
+        },
+        {
+          "word": "家庭共享",
+          "weight": "medium"
+        },
+        {
+          "word": "测速",
+          "weight": "medium"
+        },
+        {
+          "word": "京东电器",
+          "weight": "strong"
+        },
+        {
+          "word": "创维",
+          "weight": "strong"
+        },
+        {
+          "word": "月包",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -659,6 +815,26 @@
         {
           "word": "暑假班",
           "weight": "strong"
+        },
+        {
+          "word": "一对一",
+          "weight": "strong"
+        },
+        {
+          "word": "少儿编程",
+          "weight": "strong"
+        },
+        {
+          "word": "围棋",
+          "weight": "strong"
+        },
+        {
+          "word": "阅读写作",
+          "weight": "strong"
+        },
+        {
+          "word": "孩子学编程",
+          "weight": "strong"
         }
       ],
       "confusable_with": []
@@ -740,6 +916,82 @@
         {
           "word": "旅游",
           "weight": "weak"
+        },
+        {
+          "word": "特价团",
+          "weight": "strong"
+        },
+        {
+          "word": "滑雪团",
+          "weight": "strong"
+        },
+        {
+          "word": "邮轮",
+          "weight": "strong"
+        },
+        {
+          "word": "夕阳红",
+          "weight": "strong"
+        },
+        {
+          "word": "签证",
+          "weight": "medium"
+        },
+        {
+          "word": "自由行",
+          "weight": "strong"
+        },
+        {
+          "word": "海岛",
+          "weight": "medium"
+        },
+        {
+          "word": "早鸟价",
+          "weight": "strong"
+        },
+        {
+          "word": "新线路",
+          "weight": "medium"
+        },
+        {
+          "word": "亲子套餐",
+          "weight": "medium"
+        },
+        {
+          "word": "专列",
+          "weight": "medium"
+        },
+        {
+          "word": "携程",
+          "weight": "strong"
+        },
+        {
+          "word": "国旅",
+          "weight": "strong"
+        },
+        {
+          "word": "同程",
+          "weight": "strong"
+        },
+        {
+          "word": "途牛",
+          "weight": "strong"
+        },
+        {
+          "word": "驴妈妈",
+          "weight": "strong"
+        },
+        {
+          "word": "去哪儿网",
+          "weight": "strong"
+        },
+        {
+          "word": "私人定制",
+          "weight": "strong"
+        },
+        {
+          "word": "秋季线路",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -830,6 +1082,34 @@
         {
           "word": "孩子",
           "weight": "weak"
+        },
+        {
+          "word": "早教",
+          "weight": "strong"
+        },
+        {
+          "word": "月嫂",
+          "weight": "strong"
+        },
+        {
+          "word": "辅食",
+          "weight": "strong"
+        },
+        {
+          "word": "周岁照",
+          "weight": "strong"
+        },
+        {
+          "word": "婴儿游泳",
+          "weight": "strong"
+        },
+        {
+          "word": "宝妈",
+          "weight": "medium"
+        },
+        {
+          "word": "东方爱婴",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -920,6 +1200,62 @@
         {
           "word": "买车",
           "weight": "weak"
+        },
+        {
+          "word": "现车",
+          "weight": "strong"
+        },
+        {
+          "word": "免息",
+          "weight": "strong"
+        },
+        {
+          "word": "二手车",
+          "weight": "strong"
+        },
+        {
+          "word": "置换",
+          "weight": "medium"
+        },
+        {
+          "word": "车展",
+          "weight": "medium"
+        },
+        {
+          "word": "延保",
+          "weight": "medium"
+        },
+        {
+          "word": "四轮定位",
+          "weight": "medium"
+        },
+        {
+          "word": "收购",
+          "weight": "medium"
+        },
+        {
+          "word": "奥迪",
+          "weight": "strong"
+        },
+        {
+          "word": "一汽大众",
+          "weight": "strong"
+        },
+        {
+          "word": "比亚迪",
+          "weight": "strong"
+        },
+        {
+          "word": "广汽丰田",
+          "weight": "strong"
+        },
+        {
+          "word": "商务车",
+          "weight": "medium"
+        },
+        {
+          "word": "团购价",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -1002,6 +1338,62 @@
         {
           "word": "快递",
           "weight": "weak"
+        },
+        {
+          "word": "冷链物流",
+          "weight": "strong"
+        },
+        {
+          "word": "当日达",
+          "weight": "strong"
+        },
+        {
+          "word": "跨境专线",
+          "weight": "strong"
+        },
+        {
+          "word": "大客户价",
+          "weight": "strong"
+        },
+        {
+          "word": "上门揽收",
+          "weight": "strong"
+        },
+        {
+          "word": "增值税专票",
+          "weight": "medium"
+        },
+        {
+          "word": "经济型线路",
+          "weight": "medium"
+        },
+        {
+          "word": "退货处理",
+          "weight": "medium"
+        },
+        {
+          "word": "发件量",
+          "weight": "medium"
+        },
+        {
+          "word": "德邦",
+          "weight": "strong"
+        },
+        {
+          "word": "极兔",
+          "weight": "strong"
+        },
+        {
+          "word": "百世",
+          "weight": "strong"
+        },
+        {
+          "word": "双十一",
+          "weight": "medium"
+        },
+        {
+          "word": "一口价",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -1093,6 +1485,50 @@
         {
           "word": "皮肤",
           "weight": "weak"
+        },
+        {
+          "word": "祛斑",
+          "weight": "strong"
+        },
+        {
+          "word": "瘦脸针",
+          "weight": "strong"
+        },
+        {
+          "word": "水光针",
+          "weight": "strong"
+        },
+        {
+          "word": "玻尿酸",
+          "weight": "strong"
+        },
+        {
+          "word": "线雕",
+          "weight": "strong"
+        },
+        {
+          "word": "毛囊检测",
+          "weight": "strong"
+        },
+        {
+          "word": "面诊",
+          "weight": "strong"
+        },
+        {
+          "word": "韩国专家",
+          "weight": "strong"
+        },
+        {
+          "word": "爱尔眼科",
+          "weight": "strong"
+        },
+        {
+          "word": "主任操刀",
+          "weight": "medium"
+        },
+        {
+          "word": "面部案例",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -1186,6 +1622,50 @@
         {
           "word": "房子",
           "weight": "weak"
+        },
+        {
+          "word": "局部改造",
+          "weight": "strong"
+        },
+        {
+          "word": "环保套餐",
+          "weight": "strong"
+        },
+        {
+          "word": "遮光窗帘",
+          "weight": "strong"
+        },
+        {
+          "word": "厨卫翻新",
+          "weight": "medium"
+        },
+        {
+          "word": "定制衣柜",
+          "weight": "strong"
+        },
+        {
+          "word": "免费量尺",
+          "weight": "strong"
+        },
+        {
+          "word": "装饰",
+          "weight": "weak"
+        },
+        {
+          "word": "厂家直销",
+          "weight": "medium"
+        },
+        {
+          "word": "居然之家",
+          "weight": "strong"
+        },
+        {
+          "word": "软装",
+          "weight": "medium"
+        },
+        {
+          "word": "免费上门量尺",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -1270,6 +1750,54 @@
         {
           "word": "备用金",
           "weight": "weak"
+        },
+        {
+          "word": "信用贷",
+          "weight": "strong"
+        },
+        {
+          "word": "先息后本",
+          "weight": "strong"
+        },
+        {
+          "word": "无抵押",
+          "weight": "strong"
+        },
+        {
+          "word": "企业贷",
+          "weight": "strong"
+        },
+        {
+          "word": "小额周转",
+          "weight": "strong"
+        },
+        {
+          "word": "闲钱理财",
+          "weight": "strong"
+        },
+        {
+          "word": "年化",
+          "weight": "medium"
+        },
+        {
+          "word": "信用额度",
+          "weight": "medium"
+        },
+        {
+          "word": "积分清零",
+          "weight": "medium"
+        },
+        {
+          "word": "平安普惠",
+          "weight": "strong"
+        },
+        {
+          "word": "平安易贷",
+          "weight": "strong"
+        },
+        {
+          "word": "车抵",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -1385,6 +1913,34 @@
         },
         {
           "word": "扫码支付",
+          "weight": "medium"
+        },
+        {
+          "word": "必吃榜",
+          "weight": "strong"
+        },
+        {
+          "word": "扫码点餐",
+          "weight": "strong"
+        },
+        {
+          "word": "满减",
+          "weight": "medium"
+        },
+        {
+          "word": "外卖评分",
+          "weight": "medium"
+        },
+        {
+          "word": "收银系统",
+          "weight": "medium"
+        },
+        {
+          "word": "会员日",
+          "weight": "medium"
+        },
+        {
+          "word": "美食节",
           "weight": "medium"
         }
       ],
@@ -1549,6 +2105,34 @@
         {
           "word": "网约车",
           "weight": "weak"
+        },
+        {
+          "word": "免抽成",
+          "weight": "strong"
+        },
+        {
+          "word": "高峰奖励",
+          "weight": "strong"
+        },
+        {
+          "word": "顺风车",
+          "weight": "strong"
+        },
+        {
+          "word": "会员卡",
+          "weight": "medium"
+        },
+        {
+          "word": "油补",
+          "weight": "medium"
+        },
+        {
+          "word": "夜班",
+          "weight": "medium"
+        },
+        {
+          "word": "快车",
+          "weight": "medium"
         }
       ],
       "confusable_with": [

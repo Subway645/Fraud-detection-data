@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-净来电 · 话术模板匹配算法 · 最终隔离评测
+净来电 · 话术模板匹配算法 · 隔离评测
 ==========================================
-七层评测：
-  A. 模板词基线
-  B. 图谱全量 (含泄漏)
-  C. 类型过滤
-  D. 严格隔离
-  E. 完美词隔离
-  F. 完美词+公安部术语
-  G. ★类型确认片段 (最终版)
+七组方案，统一独立 test 评测（严格隔离）：
+  A. 模板词基线         (全量参考·含泄漏)
+  B. 图谱全量           (全量参考·含泄漏)
+  C. 类型过滤           (train→test)
+  D. 严格隔离           (train→test)
+  E. 完美词隔离         (train→test)
+  G. 类型确认片段       (train→val调参→test · 关键词匹配最终)
+  H. 混合分类器         (train→val调参→test · 整体最终)
 """
 import csv, json, os
 from collections import defaultdict, Counter
@@ -78,7 +78,7 @@ def load_normal_all():
 
 # =========== 匹配引擎 ===========
 
-def match_text(text, keywords, weights, type_labels):
+def match_text(text, keywords, weights, type_labels, threshold=THRESHOLD):
     if not text: return None, None, 0
     type_scores = defaultdict(int); type_med = defaultdict(int)
     for tn, words in keywords.items():
@@ -91,18 +91,19 @@ def match_text(text, keywords, weights, type_labels):
         if c >= MEDIUM_MIN: type_scores[tn] += MEDIUM_SCORE * c
     if not type_scores: return None, None, 0
     best = max(type_scores, key=type_scores.get)
-    if type_scores[best] < THRESHOLD: return None, None, type_scores[best]
+    if type_scores[best] < threshold: return None, None, type_scores[best]
     return best, type_labels.get(best, "unknown"), type_scores[best]
 
 # =========== 评测函数 ===========
 
-def evaluate_layer(texts, types, expect_label, keywords, weights, type_labels, verbose=False):
+def evaluate_layer(texts, types, expect_label, keywords, weights, type_labels, verbose=False,
+                   threshold=THRESHOLD):
     total = len(texts)
     tp = 0; dtypes = defaultdict(int); ctypes = defaultdict(int)
     ttotal = defaultdict(int); wrong = []; fps = []
     for i, (text, t) in enumerate(zip(texts, types)):
         ttotal[t] += 1
-        best_type, pred_label, score = match_text(text, keywords, weights, type_labels)
+        best_type, pred_label, score = match_text(text, keywords, weights, type_labels, threshold)
         if pred_label == expect_label:
             tp += 1
             if best_type: dtypes[best_type] += 1
@@ -222,41 +223,6 @@ def build_perfect_with_fragments(all_train_texts, all_train_types, indicates, no
                      "fragments_added": frag_added,
                      "total_words": len(ww)}
 
-# =========== 公安部反诈术语 ===========
-
-def get_official_terms():
-    """公安部 2025 年 6 月发布防诈关键词"""
-    return {
-        "安全账户": "strong", "修复征信": "strong", "刷单做任务": "strong",
-        "内幕消息": "strong", "百万保障": "strong", "积分清零": "strong",
-        "稳赚不赔": "strong", "高额回报": "strong", "垫付资金": "strong",
-        "无抵押": "strong", "低利率": "strong", "解冻费": "strong",
-        "共享屏幕": "strong", "小众聊天": "strong", "快递引流": "strong",
-        "虚拟货币": "strong", "刷流水": "strong", "购物卡": "strong",
-        "涉嫌洗钱": "strong", "三倍理赔": "strong", "开通理赔通道": "strong",
-        "海关扣押": "strong", "自动扣费": "strong", "强制执行": "strong",
-        "协查通知": "strong", "资金审查": "strong", "内部名额": "strong",
-        "包机票签证": "strong", "色情小卡片": "strong", "同城约会": "strong",
-        "AI换脸": "strong", "数字藏品空投": "strong", "Web3钱包": "strong",
-        "碳中积分": "strong", "量子通信": "strong", "无抵押贷款": "strong",
-        "不看征信": "strong", "秒到账": "strong", "包装流水": "strong",
-        "屏幕共享": "strong", "不告诉任何人": "strong",
-        "保密": "medium", "到没人的地方": "strong", "更换手机号": "medium",
-    }
-
-def inject_official(kw, ww, official, indicates, normal_all):
-    injected = 0
-    for word, weight in official.items():
-        if sum(1 for t in normal_all if word in t) > 0: continue
-        if word in ww:
-            if weight == "strong" and ww[word] == "medium": ww[word] = "strong"
-            continue
-        if word in indicates:
-            for tn, wt in indicates[word].items():
-                kw[tn].add(word)
-            ww[word] = weight; injected += 1
-    return injected
-
 # =========== 主评测 ===========
 
 def bar(title):
@@ -287,8 +253,8 @@ def main():
     all_train_t = fraud["train"][0] + ad["train"][0]
     all_train_ty = fraud["train"][1] + ad["train"][1]
 
-    bar("净来电 · 话术模板匹配 · 七层隔离评测")
-    print(f"日期: 2026-07-31 | splits 7:1.5:1.5 seed=42 | strong={STRONG_SCORE} medium={MEDIUM_SCORE} thresh={THRESHOLD}")
+    bar("话术模板匹配 · 隔离评测（A-E+G 关键词线 + H 混合分类）")
+    print(f"splits 7:1.5:1.5 seed=42 | strong={STRONG_SCORE} medium={MEDIUM_SCORE} thresh={THRESHOLD}")
     print(f"Indicates: {len(indicates)}词  Pattern: {len(pattern_ww)}词")
 
     # ---- A: 模板词 ----
@@ -314,8 +280,8 @@ def main():
     bar("C. 类型过滤 (残余泄漏)")
     for label, s in [("fraud", fraud), ("ad", ad)]:
         tk, tw = build_type_filter_kw(s["train"][1], indicates)
-        vt_t = s["val"][0]+s["test"][0]; vt_ty = s["val"][1]+s["test"][1]
-        r = evaluate_layer(vt_t, vt_ty, label, tk, tw, type_labels)
+        te_t = s["test"][0]; te_ty = s["test"][1]
+        r = evaluate_layer(te_t, te_ty, label, tk, tw, type_labels)
         print(f"  [{label}] 词数{len(tw)}  召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})  "
               f"覆盖率 {r['type_coverage']}  准确率 {r['type_accuracy']:.1f}%")
     tk_f, tw_f = build_type_filter_kw(fraud["train"][1], indicates)
@@ -324,16 +290,16 @@ def main():
     for d in [tk_f, tk_a]:
         for tn, ws in d.items(): c_kw[tn] |= ws
     c_ww.update(tw_f); c_ww.update(tw_a)
-    nvt_t = norm["val"][0]+norm["test"][0]; nvt_ty = norm["val"][1]+norm["test"][1]
-    r = evaluate_layer(nvt_t, nvt_ty, "normal", c_kw, c_ww, type_labels)
+    nte_t = norm["test"][0]; nte_ty = norm["test"][1]
+    r = evaluate_layer(nte_t, nte_ty, "normal", c_kw, c_ww, type_labels)
     print(f"  [normal] 误报 {r['fp_count']}/{r['total']}")
 
     # ---- D: 严格隔离 ----
     bar("D. 严格隔离 (真实下限)")
     for label, s in [("fraud", fraud), ("ad", ad)]:
         sk, sw = build_strict_kw(s["train"][0], s["train"][1], indicates)
-        vt_t = s["val"][0]+s["test"][0]; vt_ty = s["val"][1]+s["test"][1]
-        r = evaluate_layer(vt_t, vt_ty, label, sk, sw, type_labels)
+        te_t = s["test"][0]; te_ty = s["test"][1]
+        r = evaluate_layer(te_t, te_ty, label, sk, sw, type_labels)
         print(f"  [{label}] 词数{len(sw)}  召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})  "
               f"覆盖率 {r['type_coverage']}  准确率 {r['type_accuracy']:.1f}%")
         if r["zero_hit_types"]: print(f"    零命中: {r['zero_hit_types']}")
@@ -343,7 +309,7 @@ def main():
     for d in [sk_f, sk_a]:
         for tn, ws in d.items(): s_kw[tn] |= ws
     s_ww.update(sw_f); s_ww.update(sw_a)
-    r = evaluate_layer(nvt_t, nvt_ty, "normal", s_kw, s_ww, type_labels)
+    r = evaluate_layer(nte_t, nte_ty, "normal", s_kw, s_ww, type_labels)
     print(f"  [normal] 误报 {r['fp_count']}/{r['total']}")
 
     # ---- E: 完美词 ----
@@ -352,11 +318,11 @@ def main():
     for label, s in [("fraud", fraud), ("ad", ad)]:
         pk, pw, ps = build_perfect_kw(s["train"][0], s["train"][1], indicates, normal_all)
         perf[label] = (pk, pw, ps)
-        vt_t = s["val"][0]+s["test"][0]; vt_ty = s["val"][1]+s["test"][1]
+        te_t = s["test"][0]; te_ty = s["test"][1]
         tr = evaluate_layer(s["train"][0], s["train"][1], label, pk, pw, type_labels)
-        r = evaluate_layer(vt_t, vt_ty, label, pk, pw, type_labels)
+        r = evaluate_layer(te_t, te_ty, label, pk, pw, type_labels)
         print(f"  [{label}] 完美词{ps['perfect_total']} (过滤{ps['filtered_by_normal']})")
-        print(f"          train: 召回 {tr['recall']:.1f}%  val+test: 召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})  "
+        print(f"          train: 召回 {tr['recall']:.1f}%  test: 召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})  "
               f"覆盖率 {r['type_coverage']}  准确率 {r['type_accuracy']:.1f}%")
         if r["zero_hit_types"]: print(f"          零命中: {r['zero_hit_types']}")
     p_kw = defaultdict(set); p_ww = {}
@@ -364,85 +330,160 @@ def main():
         pk, pw, _ = perf[label_]
         for tn, ws in pk.items(): p_kw[tn] |= ws
         p_ww.update(pw)
-    r = evaluate_layer(nvt_t, nvt_ty, "normal", p_kw, p_ww, type_labels)
+    r = evaluate_layer(nte_t, nte_ty, "normal", p_kw, p_ww, type_labels)
     print(f"  [normal] 误报 {r['fp_count']}/{r['total']}")
 
-    # ---- F: 完美词+外部 ----
-    bar("F. 完美词+外部术语 (+公安部2025)")
-    official = get_official_terms()
-    f_res = {}
-    for label, s in [("fraud", fraud), ("ad", ad)]:
-        pk = defaultdict(set, perf[label][0]); pw = dict(perf[label][1])
-        inj = inject_official(pk, pw, official, indicates, normal_all)
-        vt_t = s["val"][0]+s["test"][0]; vt_ty = s["val"][1]+s["test"][1]
-        r = evaluate_layer(vt_t, vt_ty, label, pk, pw, type_labels)
-        f_res[label] = (pk, pw, r)
-        print(f"  [{label}] 完美词{len(perf[label][1])}+注入{inj}={len(pw)}词  "
-              f"召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})")
-    f_kw = defaultdict(set); f_ww = {}
-    for label_ in ["fraud", "ad"]:
-        pk, pw, _ = f_res[label_]
-        for tn, ws in pk.items(): f_kw[tn] |= ws
-        f_ww.update(pw)
-    r = evaluate_layer(nvt_t, nvt_ty, "normal", f_kw, f_ww, type_labels)
-    print(f"  [normal] 误报 {r['fp_count']}/{r['total']}")
+    # ---- G: 类型确认片段 (val 调参) ----
+    bar("G. 类型确认片段 (val 调参 · 关键词最终)")
+    # G 层有两个超参: min_confirm(片段需同类命中≥几次), threshold(触发报警分数)
+    # 规范做法: 在 val 上扫描选最优, 再用最优参数上 test
+    best_g_cfg = None  # (score, min_confirm, threshold)
+    for mc in [1, 2, 3]:
+        for th in [3, 4, 5, 6]:
+            # 在 val 上评测 fraud 和 ad 的召回+normal误报
+            val_f_hits = 0; val_f_total = 0
+            val_a_hits = 0; val_a_total = 0
+            val_n_fp = 0; val_n_total = 0
+            for label, s in [("fraud", fraud), ("ad", ad)]:
+                gk_tmp, gw_tmp, _ = build_perfect_with_fragments(
+                    s["train"][0], s["train"][1], indicates, normal_all, min_confirm=mc)
+                va_t = s["val"][0]; va_ty = s["val"][1]
+                r = evaluate_layer(va_t, va_ty, label, gk_tmp, gw_tmp, type_labels, threshold=th)
+                if label == "fraud":
+                    val_f_hits += r["hit"]; val_f_total += r["total"]
+                else:
+                    val_a_hits += r["hit"]; val_a_total += r["total"]
+            # normal val 误报
+            gk_comb = defaultdict(set); gw_comb = {}
+            for label, s in [("fraud", fraud), ("ad", ad)]:
+                gk_tmp, gw_tmp, _ = build_perfect_with_fragments(
+                    s["train"][0], s["train"][1], indicates, normal_all, min_confirm=mc)
+                for tn, ws in gk_tmp.items(): gk_comb[tn] |= ws
+                gw_comb.update(gw_tmp)
+            rn = evaluate_layer(norm["val"][0], norm["val"][1], "normal", gk_comb, gw_comb, type_labels, threshold=th)
+            val_n_fp += rn["fp_count"]; val_n_total += rn["total"]
 
-    # ---- G: 类型确认片段 ----
-    bar("G. 类型确认片段 (最终版)")
-    g_res = {}
-    for label, s in [("fraud", fraud), ("ad", ad)]:
-        gk, gw, gs = build_perfect_with_fragments(
-            s["train"][0], s["train"][1], indicates, normal_all, min_confirm=2)
-        vt_t = s["val"][0]+s["test"][0]; vt_ty = s["val"][1]+s["test"][1]
-        tr = evaluate_layer(s["train"][0], s["train"][1], label, gk, gw, type_labels)
-        r = evaluate_layer(vt_t, vt_ty, label, gk, gw, type_labels)
-        g_res[label] = (gk, gw, gs, r)
-        print(f"  [{label}] 完美词{gs['perfect_total']}+片段{gs['fragments_added']}={gs['total_words']}词")
-        print(f"          (长词缺失{gs['long_missing']}, 确认片段{gs['fragments_confirmed']})")
-        print(f"          train: 召回 {tr['recall']:.1f}%  val+test: 召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})  "
-              f"覆盖率 {r['type_coverage']}  准确率 {r['type_accuracy']:.1f}%")
-        if r["zero_hit_types"]: print(f"          零命中: {r['zero_hit_types']}")
-    g_kw = defaultdict(set); g_ww = {}
-    for label_ in ["fraud", "ad"]:
-        pk, pw, _, _ = g_res[label_]
-        for tn, ws in pk.items(): g_kw[tn] |= ws
-        g_ww.update(pw)
-    r = evaluate_layer(nvt_t, nvt_ty, "normal", g_kw, g_ww, type_labels, verbose=True)
-    print(f"  [normal] 误报 {r['fp_count']}/{r['total']}")
-    if r["false_positives"]:
-        for idx, txt, pl, bt, sc in r["false_positives"][:10]:
-            print(f"      #{idx} '{txt}' -> {pl}({bt})")
+            val_score = (val_f_hits/val_f_total*100 if val_f_total else 0) + (val_a_hits/val_a_total*100 if val_a_total else 0)
+            # 约束: normal 误报 <= 3, 取召回最高
+            if val_n_fp <= 3:
+                if best_g_cfg is None or val_score > best_g_cfg[0]:
+                    best_g_cfg = (val_score, mc, th, val_f_hits/val_f_total*100, val_a_hits/val_a_total*100, val_n_fp)
+    if best_g_cfg:
+        _, g_mc, g_th, g_fr, g_ar, g_nfp = best_g_cfg
+        print(f"  val 选参: min_confirm={g_mc}, threshold={g_th}, fraud={g_fr:.1f}%, ad={g_ar:.1f}%, normal误报={g_nfp}")
+        g_res = {}
+        for label, s in [("fraud", fraud), ("ad", ad)]:
+            gk, gw, gs = build_perfect_with_fragments(
+                s["train"][0], s["train"][1], indicates, normal_all, min_confirm=g_mc)
+            te_t = s["test"][0]; te_ty = s["test"][1]
+            tr = evaluate_layer(s["train"][0], s["train"][1], label, gk, gw, type_labels, threshold=g_th)
+            r = evaluate_layer(te_t, te_ty, label, gk, gw, type_labels, threshold=g_th)
+            g_res[label] = (gk, gw, gs, r)
+            print(f"  [{label}] 完美词{gs['perfect_total']}+片段{gs['fragments_added']}={gs['total_words']}词")
+            print(f"          (长词缺失{gs['long_missing']}, 确认片段{gs['fragments_confirmed']})")
+            print(f"          train: 召回 {tr['recall']:.1f}%  test: 召回 {r['recall']:.1f}% ({r['hit']}/{r['total']})  "
+                  f"覆盖率 {r['type_coverage']}  准确率 {r['type_accuracy']:.1f}%")
+            if r["zero_hit_types"]: print(f"          零命中: {r['zero_hit_types']}")
+        g_kw = defaultdict(set); g_ww = {}
+        for label_ in ["fraud", "ad"]:
+            pk, pw, _, _ = g_res[label_]
+            for tn, ws in pk.items(): g_kw[tn] |= ws
+            g_ww.update(pw)
+        r = evaluate_layer(nte_t, nte_ty, "normal", g_kw, g_ww, type_labels, threshold=g_th, verbose=True)
+        print(f"  [normal] 误报 {r['fp_count']}/{r['total']}")
+        if r["false_positives"]:
+            for idx, txt, pl, bt, sc in r["false_positives"][:10]:
+                print(f"      #{idx} '{txt}' -> {pl}({bt})")
+    else:
+        print("  val 上无满足 normal误报<=3 的配置")
+        # 回退到默认
+        g_res = {}
+        for label, s in [("fraud", fraud), ("ad", ad)]:
+            gk, gw, gs = build_perfect_with_fragments(
+                s["train"][0], s["train"][1], indicates, normal_all, min_confirm=2)
+            te_t = s["test"][0]; te_ty = s["test"][1]
+            r = evaluate_layer(te_t, te_ty, label, gk, gw, type_labels)
+            g_res[label] = (gk, gw, gs, r)
+        g_kw = defaultdict(set); g_ww = {}
+        for label_ in ["fraud", "ad"]:
+            pk, pw, _, _ = g_res[label_]
+            for tn, ws in pk.items(): g_kw[tn] |= ws
+            g_ww.update(pw)
+        g_th = THRESHOLD
+
+    # ---- H: 混合分类器 (整体最终) ----
+    bar("H. 混合分类器 (TF-IDF+LR + 关键词救回 · 整体最终)")
+    from hybrid_clf import HybridClassifier
+    # 训练数据: fraud+ad+normal 的 train
+    h_train_t = fraud["train"][0] + ad["train"][0] + norm["train"][0]
+    h_train_l = ["fraud"]*len(fraud["train"][0]) + ["ad"]*len(ad["train"][0]) + ["normal"]*len(norm["train"][0])
+
+    # val 选 C (约束: normal 误报<=3, 取召回最高)
+    best_cfg = None
+    for C in [0.08, 0.1, 0.12, 0.15]:
+        m = HybridClassifier(C=C, kw_min_score=3)
+        m.fit(h_train_t, h_train_l, norm["train"][0], indicates, type_labels)
+        nfp = sum(1 for t in norm["val"][0] if m.predict(t) != "normal")
+        fh = sum(1 for t in fraud["val"][0] if m.predict(t) == "fraud")
+        ah = sum(1 for t in ad["val"][0] if m.predict(t) == "ad")
+        if nfp <= 3:
+            score = fh/len(fraud["val"][0])*100 + ah/len(ad["val"][0])*100
+            if best_cfg is None or score > best_cfg[0]:
+                best_cfg = (score, C, fh/len(fraud["val"][0])*100, ah/len(ad["val"][0])*100, nfp)
+    if best_cfg:
+        _, C_best, fr_b, ar_b, nfp_b = best_cfg
+        print(f"  val 选参: C={C_best}, fraud={fr_b:.1f}%, ad={ar_b:.1f}%, normal误报={nfp_b}")
+        m_final = HybridClassifier(C=C_best, kw_min_score=3)
+        m_final.fit(h_train_t, h_train_l, norm["train"][0], indicates, type_labels)
+        # 独立 test 最终评测 (严格隔离)
+        f_h = sum(1 for t in fraud["test"][0] if m_final.predict(t) == "fraud")
+        a_h = sum(1 for t in ad["test"][0] if m_final.predict(t) == "ad")
+        n_fp = sum(1 for t in norm["test"][0] if m_final.predict(t) != "normal")
+        print(f"  test 最终: fraud {f_h}/{len(fraud['test'][0])} = {f_h/len(fraud['test'][0])*100:.1f}%  "
+              f"ad {a_h}/{len(ad['test'][0])} = {a_h/len(ad['test'][0])*100:.1f}%  "
+              f"normal误报 {n_fp}/{len(norm['test'][0])}")
+        h_fraud_recall = f_h/len(fraud['test'][0])*100
+        h_ad_recall = a_h/len(ad['test'][0])*100
+        h_normal_fp = n_fp
+    else:
+        print("  val 上无满足 normal误报<=3 的配置")
+        h_fraud_recall, h_ad_recall, h_normal_fp = 0, 0, 0
 
     # =========== 汇总 ===========
-    bar("七组评测汇总")
-    l7 = "  [{label}] 召回: {a:>5.1f}% {b:>5.1f}% {c:>5.1f}% {d:>5.1f}% {e:>5.1f}% {f:>5.1f}% {g:>5.1f}%"
-    a7 = "         准确率: {a:>5.1f}% {b:>5.1f}% {c:>5.1f}% {d:>5.1f}% {e:>5.1f}% {f:>5.1f}% {g:>5.1f}%"
-    print(f"            {'A.模板词':>7} {'B.全量泄漏':>8} {'C.类型过滤':>8} {'D.严格隔离':>8} {'E.完美词':>8} {'F.+公安部':>8} {'G.类型片段':>8}")
+    bar("七组评测汇总（A-E+G 关键词线 + H 混合分类器）")
+    l7 = "  [{label}] 召回: {a:>5.1f}% {b:>5.1f}% {c:>5.1f}% {d:>5.1f}% {e:>5.1f}% {g:>5.1f}% {h:>5.1f}%"
+    a7 = "         准确率: {a:>5.1f}% {b:>5.1f}% {c:>5.1f}% {d:>5.1f}% {e:>5.1f}% {g:>5.1f}% {h:>5.1f}%"
+    print(f"            {'A.模板词':>7} {'B.全量泄漏':>8} {'C.类型过滤':>8} {'D.严格隔离':>8} {'E.完美词':>8} {'G.类型片段':>8} {'H.混合分类':>8}")
     for label, s in [("fraud", fraud), ("ad", ad)]:
         at = s["train"][0]+s["val"][0]+s["test"][0]
         aty = s["train"][1]+s["val"][1]+s["test"][1]
-        vt_t = s["val"][0]+s["test"][0]
-        vt_ty = s["val"][1]+s["test"][1]
+        te_t = s["test"][0]
+        te_ty = s["test"][1]
         ra = evaluate_layer(at, aty, label, pattern_kw, pattern_ww, type_labels)
         rb = evaluate_layer(at, aty, label, all_kw, all_ww, type_labels)
         skc, swc = build_type_filter_kw(s["train"][1], indicates)
-        rc = evaluate_layer(vt_t, vt_ty, label, skc, swc, type_labels)
+        rc = evaluate_layer(te_t, te_ty, label, skc, swc, type_labels)
         skd, swd = build_strict_kw(s["train"][0], s["train"][1], indicates)
-        rd = evaluate_layer(vt_t, vt_ty, label, skd, swd, type_labels)
-        pk, pw, _ = perf[label]; re = evaluate_layer(vt_t, vt_ty, label, pk, pw, type_labels)
-        _, _, rf = f_res[label]; _, _, _, rg = g_res[label]
-        print(f"  [{label}] 召回:    {ra['recall']:>5.1f}% {rb['recall']:>6.1f}% {rc['recall']:>6.1f}% {rd['recall']:>6.1f}% {re['recall']:>6.1f}% {rf['recall']:>6.1f}% {rg['recall']:>6.1f}%")
-        print(f"         准确率:    {ra['type_accuracy']:>5.1f}% {rb['type_accuracy']:>6.1f}% {rc['type_accuracy']:>6.1f}% {rd['type_accuracy']:>6.1f}% {re['type_accuracy']:>6.1f}% {rf['type_accuracy']:>6.1f}% {rg['type_accuracy']:>6.1f}%")
+        rd = evaluate_layer(te_t, te_ty, label, skd, swd, type_labels)
+        pk, pw, _ = perf[label]; re = evaluate_layer(te_t, te_ty, label, pk, pw, type_labels)
+        _, _, _, rg = g_res[label]
+        # H 层: 独立 test
+        if label == "fraud":
+            rh_val = h_fraud_recall; rh_acc = 0
+        else:
+            rh_val = h_ad_recall; rh_acc = 0
+        print(f"  [{label}] 召回:    {ra['recall']:>5.1f}% {rb['recall']:>6.1f}% {rc['recall']:>6.1f}% {rd['recall']:>6.1f}% {re['recall']:>6.1f}% {rg['recall']:>6.1f}% {rh_val:>6.1f}%")
+        print(f"         准确率:    {ra['type_accuracy']:>5.1f}% {rb['type_accuracy']:>6.1f}% {rc['type_accuracy']:>6.1f}% {rd['type_accuracy']:>6.1f}% {re['type_accuracy']:>6.1f}% {rg['type_accuracy']:>6.1f}%       -")
     # normal
     rna = evaluate_layer(nall_t, nall_ty, "normal", pattern_kw, pattern_ww, type_labels)
     rnb = evaluate_layer(nall_t, nall_ty, "normal", all_kw, all_ww, type_labels)
-    rnc = evaluate_layer(nvt_t, nvt_ty, "normal", c_kw, c_ww, type_labels)
-    rnd = evaluate_layer(nvt_t, nvt_ty, "normal", s_kw, s_ww, type_labels)
-    rne = evaluate_layer(nvt_t, nvt_ty, "normal", p_kw, p_ww, type_labels)
-    rnf = evaluate_layer(nvt_t, nvt_ty, "normal", f_kw, f_ww, type_labels)
-    rng = evaluate_layer(nvt_t, nvt_ty, "normal", g_kw, g_ww, type_labels)
-    print(f"  [normal] 误报:    {rna['fp_count']:>3}/{rna['total']:<3}  {rnb['fp_count']:>3}/{rnb['total']:<3}   {rnc['fp_count']:>3}/{rnc['total']:<3}   {rnd['fp_count']:>3}/{rnd['total']:<3}   {rne['fp_count']:>3}/{rne['total']:<3}   {rnf['fp_count']:>3}/{rnf['total']:<3}   {rng['fp_count']:>3}/{rng['total']:<3}")
-    print(f"\n  A=人工基线 B=含泄漏 C=残余泄漏 D=严格下限 E=零误报基准 F=+公安部 G=★最终(类型确认片段)")
+    rnc = evaluate_layer(nte_t, nte_ty, "normal", c_kw, c_ww, type_labels)
+    rnd = evaluate_layer(nte_t, nte_ty, "normal", s_kw, s_ww, type_labels)
+    rne = evaluate_layer(nte_t, nte_ty, "normal", p_kw, p_ww, type_labels)
+    rng = evaluate_layer(nte_t, nte_ty, "normal", g_kw, g_ww, type_labels, threshold=g_th)
+    print(f"  [normal] 误报:    {rna['fp_count']:>3}/{rna['total']:<3}  {rnb['fp_count']:>3}/{rnb['total']:<3}   {rnc['fp_count']:>3}/{rnc['total']:<3}   {rnd['fp_count']:>3}/{rnd['total']:<3}   {rne['fp_count']:>3}/{rne['total']:<3}   {rng['fp_count']:>3}/{rng['total']:<3}   {h_normal_fp:>3}/{len(norm['test'][0])}")
+    print(f"\n  A=人工基线 B=含泄漏 C=类型过滤 D=严格隔离 E=完美词 G=类型片段(关键词·test) H=混合分类器(整体·test)")
+    print(f"  C/D/E/G/H 均为独立 test 评测 (严格隔离); A/B 为全量参考 (含泄漏)")
 
 if __name__ == "__main__":
     main()

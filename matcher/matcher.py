@@ -1,8 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-净来电 · 话术模板匹配算法（G 层·最终版）
-=========================================
-基于 indicates 表 + 公安部2025防诈术语 + 类型确认片段三层融合做三档权重打分。
+净来电 · 话术模板匹配算法（B 层口径 · 生产打分）
+===============================================
+基于 indicates 全表 + 类型确认片段两层融合做三档权重打分。
+
+⚠️ 口径说明（重要）：
+  - 本脚本第一层使用【全量 indicates 表】（905 词，过滤 normal 命中词），
+    对应 isolated_eval.py 的 B 层（图谱全量·含泄漏）
+  - 因为 indicates 表中的 Brand/Phrase 实体从全量 utterance 数据提取，
+    与评测数据同源，存在特征构建阶段的泄漏。
+  - 所以本脚本输出的召回率（fraud 86.0% / ad 81.9%）是【生产环境最佳性能】，
+    【不是】真实泛化能力。
+  - 真实泛化（严格隔离）见：
+      · G 层关键词（真正从 train 推导）：isolated_eval.py（fraud 72.2% / ad 64.7% / 误报 0）
+      · H 层混合分类器：hybrid_clf.py（fraud 75.6% / ad 76.5% / 误报 5/120）
+
+用途：生产部署 / 日常检查（要尽可能全的词表拦诈骗）。
 
 权重规则：
   strong: 命中 +3 分，单次命中即可触发报警
@@ -14,14 +27,18 @@
   - 最高分类型得分 >= THRESHOLD 时，判定为该类型
   - 同时命中诈骗和广告时取高分者
 
-关键词来源（三层融合）：
-  1. indicates 表（从 knowledge_graph/relations.csv 加载）：人工构建的词表
-  2. 公安部2025防诈术语（共44个）：外部合法资源
-  3. 类型确认片段：从长词自动提取的 2-3gram，需 train 同类确认
+关键词来源（两层融合）：
+  1. indicates 全表（从 knowledge_graph/relations.csv 加载）：过滤 normal 命中词
+  2. 类型确认片段：从长词自动提取的 2-3gram，需 train 同类确认
 
 审核承诺：
-  零正常误报：所有注入词需在 470 条正常数据中零命中
-  严格数据隔离：类型确认片段仅在 train 文本上推导，不窥探 val/test
+  零正常误报：所有注入词需在 800 条正常数据中零命中
+  类型确认片段：仅在 train 文本上推导，不窥探 val/test
+
+与 G 层 / H 层的关系：
+  - G 层（isolated_eval.py）：关键词匹配的严格隔离版（train 推导），零误报兜底
+  - H 层（hybrid_clf.py）：TF-IDF+LR 分类器 + 关键词救回，召回更高
+  - 本文件（matcher.py）：生产口径（B 层全量词表），含特征泄漏，仅作日常检查
 
 用法：
   from matcher.matcher import match_text, evaluate
@@ -42,28 +59,6 @@ STRONG_SCORE = 3
 MEDIUM_SCORE = 1
 MEDIUM_MIN = 2
 THRESHOLD = 3
-
-
-# =========== 公安部 2025 防诈术语 ===========
-
-OFFICIAL_TERMS = {
-    "安全账户": "strong", "修复征信": "strong", "刷单做任务": "strong",
-    "内幕消息": "strong", "百万保障": "strong", "积分清零": "strong",
-    "稳赚不赔": "strong", "高额回报": "strong", "垫付资金": "strong",
-    "无抵押": "strong", "低利率": "strong", "解冻费": "strong",
-    "共享屏幕": "strong", "小众聊天": "strong", "快递引流": "strong",
-    "虚拟货币": "strong", "刷流水": "strong", "购物卡": "strong",
-    "涉嫌洗钱": "strong", "三倍理赔": "strong", "开通理赔通道": "strong",
-    "海关扣押": "strong", "自动扣费": "strong", "强制执行": "strong",
-    "协查通知": "strong", "资金审查": "strong", "内部名额": "strong",
-    "包机票签证": "strong", "色情小卡片": "strong", "同城约会": "strong",
-    "AI换脸": "strong", "数字藏品空投": "strong", "Web3钱包": "strong",
-    "碳中积分": "strong", "量子通信": "strong", "无抵押贷款": "strong",
-    "不看征信": "strong", "秒到账": "strong", "包装流水": "strong",
-    "屏幕共享": "strong", "不告诉任何人": "strong",
-    "保密": "medium", "到没人的地方": "strong", "更换手机号": "medium",
-    "NFC": "medium", "NFC贴卡": "strong", "两卡": "strong",
-}
 
 
 # =========== 数据加载（延迟初始化，避免启动开销） ===========
@@ -104,7 +99,7 @@ def _load_type_labels():
 
 
 def _load_normal_texts():
-    """加载全部 470 条正常话术（用于 zero-hit 验证）"""
+    """加载全部 800 条正常话术（用于 zero-hit 验证）"""
     texts = []
     for split in ['train', 'val', 'test']:
         path = os.path.join(TEXT_DIR, "splits", "normal", f"normal_utterances_{split}.csv")
@@ -198,11 +193,11 @@ def _build_type_confirmed_fragments(indicates, min_confirm=2):
     return dict(confirmed)
 
 
-# =========== 关键词表构建（三层融合） ===========
+# =========== 关键词表构建（两层融合） ===========
 
 def _build_keywords():
     """
-    构建三层融合关键词表。
+    构建两层融合关键词表。
 
     返回: (word_to_types, type_labels)
       word_to_types: {word: {type_name: weight}}
@@ -219,18 +214,7 @@ def _build_keywords():
         for tn, wt in type_map.items():
             word_to_types[word][tn] = wt
 
-    # 第二层：公安部 2025 术语（额外注入，zero-hit 验证）
-    for word, weight in OFFICIAL_TERMS.items():
-        if sum(1 for t in normal_texts if word in t) > 0:
-            continue
-        if word in indicates:
-            for tn, wt in indicates[word].items():
-                better = weight if (weight == "strong" and wt == "medium") else wt
-                word_to_types[word][tn] = better
-            continue
-        # 不在 indicates 里的新词不注入（无类型映射）
-
-    # 第三层：类型确认片段
+    # 第二层：类型确认片段
     fragments = _build_type_confirmed_fragments(indicates, min_confirm=2)
     for frag, type_map in fragments.items():
         for tn, wt in type_map.items():
@@ -241,9 +225,10 @@ def _build_keywords():
 
 # =========== 公开 API ===========
 
+
 def match_text(text):
     """
-    对一段文本做话术匹配（三层融合关键词表）。
+    对一段文本做话术匹配（两层融合关键词表：indicates 全表 + 类型确认片段）。
 
     参数:
         text: str, 待匹配的文本
@@ -319,29 +304,8 @@ def _load_utterances(label):
 
 
 def evaluate():
-    """验收评测。
-
-    口径说明：
-      - match_text() 使用的是三层融合关键词表（indicates 全表 + 公安部2025 + 类型确认片段）
-      - 三层的构建均依赖全量 indicates 表（656词），而 indicates 表中的 Brand/Phrase 实体
-        从全量 utterance 数据中提取，与评测数据同源 → 存在特征构建阶段的数据泄漏
-      - 因此 evaluate() 输出的召回率（fraud ~91%, ad ~94%）反映了「生产环境中的最佳性能」
-        但**不是真实泛化能力的严格证明**
-      - 严格隔离的真实指标见 matcher/isolated_eval.py 的 G 列（fraud 65.2% / ad 53.7%）
-
-    建议：
-      - 日常开发用 evaluate() 看整体趋势
-      - 汇报用 isolated_eval.py 的 G 列
-    """
-    print("=" * 64)
-    print("话术模板匹配算法 · 验收 (G 层·最终版)")
-    print("=" * 64)
-    print()
-    print("⚠️ 注意：本评测使用全量 indicates 表，存在特征构建阶段的数据泄漏。")
-    print("   严格隔离的真实指标见 isolated_eval.py G 列：fraud 65.2% / ad 53.7%")
-    print("   本输出反映生产环境中的最佳性能（fraud ~91% / ad ~94%）。")
-    print()
-
+    """生产口径验收（B 层全量词表，含特征泄漏，仅日常检查）。"""
+    print("话术模板匹配算法验收 B层口径")
     results = {}
     for label, expect_label in [("fraud", "fraud"), ("ad", "ad"), ("normal", "normal")]:
         texts, types_ = _load_utterances(label)
@@ -375,8 +339,11 @@ def evaluate():
 
         print(f"\n[{label}] 样本 {total} 条，命中 {tp} 条，召回率 {recall:.1f}%")
         if label == "normal":
-            print(f"    误报: {len(wrong_label)} 条")
-            for i, txt, pl, bt, sc in wrong_label[:8]:
+            # normal 的正确行为是「未命中任何诈骗/广告类型」= 拒识
+            # 误报 = 被判成 fraud/ad 的 normal 样本
+            fps = [(i, txt, pl, bt, sc) for i, txt, pl, bt, sc in wrong_label if pl is not None]
+            print(f"    误报: {len(fps)} 条（normal 被判成 fraud/ad）")
+            for i, txt, pl, bt, sc in fps[:8]:
                 print(f"      #{i} '{txt}' -> {pl}({bt}) score={sc}")
         else:
             zero_types = [t for t, tot in type_total.items() if detected_types.get(t, 0) == 0]
@@ -397,9 +364,11 @@ def evaluate():
                     print(f"    主要混淆: {top_conf}")
 
     print("\n" + "=" * 64)
+    # 正常误报 = normal 被判成 fraud/ad 的样本数
+    normal_fp = len([w for w in results['normal']['wrong'] if w[2] is not None])
     print(f"总结: 诈骗召回 {results['fraud']['recall']:.1f}% | "
           f"广告召回 {results['ad']['recall']:.1f}% | "
-          f"正常误报 {results['normal']['hit']}/{results['normal']['total']} 条")
+          f"正常误报 {normal_fp}/{results['normal']['total']} 条")
     print("=" * 64)
 
     return results
@@ -407,6 +376,6 @@ def evaluate():
 
 if __name__ == "__main__":
     n = reload()
-    print(f"已加载 {n} 个关键词（三层融合：indicates + 公安部2025 + 类型确认片段）")
+    print(f"已加载 {n} 个关键词（indicates 全表 + 类型确认片段）")
     print()
     evaluate()

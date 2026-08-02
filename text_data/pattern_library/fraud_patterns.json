@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "version": "1.4",
+    "version": "1.5",
     "date": "2026-07-30",
     "total_types": 28,
     "groups": {
@@ -41,7 +41,7 @@
         "网络诈骗"
       ]
     },
-    "changelog": "v1.4: 同步图谱提升的97个词回keywords"
+    "changelog": "v1.5: 数据扩至600/452后补全关键词(人工审词+normal零命中校验)"
   },
   "patterns": {
     "冒充公检法人员诈骗": {
@@ -189,6 +189,34 @@
         {
           "word": "非法入境",
           "weight": "strong"
+        },
+        {
+          "word": "非法集资",
+          "weight": "strong"
+        },
+        {
+          "word": "逮捕令",
+          "weight": "strong"
+        },
+        {
+          "word": "取保候审",
+          "weight": "strong"
+        },
+        {
+          "word": "通缉令",
+          "weight": "strong"
+        },
+        {
+          "word": "追逃",
+          "weight": "strong"
+        },
+        {
+          "word": "自首",
+          "weight": "medium"
+        },
+        {
+          "word": "网上追逃",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -298,6 +326,22 @@
         {
           "word": "高回报理财产品",
           "weight": "strong"
+        },
+        {
+          "word": "提额",
+          "weight": "medium"
+        },
+        {
+          "word": "境外盗刷",
+          "weight": "strong"
+        },
+        {
+          "word": "担保费",
+          "weight": "strong"
+        },
+        {
+          "word": "工本费",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -394,6 +438,18 @@
         {
           "word": "交保证金",
           "weight": "strong"
+        },
+        {
+          "word": "列入黑名单",
+          "weight": "strong"
+        },
+        {
+          "word": "解封",
+          "weight": "medium"
+        },
+        {
+          "word": "缴代理费",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -486,6 +542,22 @@
         {
           "word": "配合注销",
           "weight": "strong"
+        },
+        {
+          "word": "违法信息",
+          "weight": "strong"
+        },
+        {
+          "word": "封号",
+          "weight": "strong"
+        },
+        {
+          "word": "不良内容",
+          "weight": "strong"
+        },
+        {
+          "word": "整改",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -581,6 +653,22 @@
         {
           "word": "被标记为诈骗号码",
           "weight": "strong"
+        },
+        {
+          "word": "诈骗短信",
+          "weight": "strong"
+        },
+        {
+          "word": "骚扰电话",
+          "weight": "medium"
+        },
+        {
+          "word": "实名信息",
+          "weight": "medium"
+        },
+        {
+          "word": "锁定金",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -662,6 +750,26 @@
         },
         {
           "word": "银保监会",
+          "weight": "strong"
+        },
+        {
+          "word": "征信报告",
+          "weight": "strong"
+        },
+        {
+          "word": "逾期记录",
+          "weight": "strong"
+        },
+        {
+          "word": "网贷账户",
+          "weight": "strong"
+        },
+        {
+          "word": "消除",
+          "weight": "medium"
+        },
+        {
+          "word": "解约费",
           "weight": "strong"
         }
       ],
@@ -745,6 +853,38 @@
         {
           "word": "被拦截",
           "weight": "strong"
+        },
+        {
+          "word": "ETC卡",
+          "weight": "strong"
+        },
+        {
+          "word": "ETC认证",
+          "weight": "strong"
+        },
+        {
+          "word": "工本费",
+          "weight": "strong"
+        },
+        {
+          "word": "通行费",
+          "weight": "medium"
+        },
+        {
+          "word": "续期",
+          "weight": "medium"
+        },
+        {
+          "word": "异地消费",
+          "weight": "medium"
+        },
+        {
+          "word": "逃费",
+          "weight": "strong"
+        },
+        {
+          "word": "自动扣除",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -848,6 +988,22 @@
         {
           "word": "提供账户信息",
           "weight": "strong"
+        },
+        {
+          "word": "医疗补助",
+          "weight": "strong"
+        },
+        {
+          "word": "骗保",
+          "weight": "strong"
+        },
+        {
+          "word": "违规药品",
+          "weight": "medium"
+        },
+        {
+          "word": "医保账户",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -934,6 +1090,30 @@
         {
           "word": "住房补贴",
           "weight": "strong"
+        },
+        {
+          "word": "失业补助金",
+          "weight": "strong"
+        },
+        {
+          "word": "独生子女补贴",
+          "weight": "strong"
+        },
+        {
+          "word": "家电下乡",
+          "weight": "strong"
+        },
+        {
+          "word": "教育补助",
+          "weight": "strong"
+        },
+        {
+          "word": "节能补贴",
+          "weight": "strong"
+        },
+        {
+          "word": "补贴发放",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -1104,6 +1284,30 @@
         {
           "word": "跟着我操作",
           "weight": "strong"
+        },
+        {
+          "word": "试试水",
+          "weight": "strong"
+        },
+        {
+          "word": "入金",
+          "weight": "strong"
+        },
+        {
+          "word": "收益截图",
+          "weight": "strong"
+        },
+        {
+          "word": "聊天软件",
+          "weight": "medium"
+        },
+        {
+          "word": "部队的军官",
+          "weight": "strong"
+        },
+        {
+          "word": "别错过行情",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -1226,6 +1430,22 @@
         {
           "word": "半小时内",
           "weight": "strong"
+        },
+        {
+          "word": "亲戚看见",
+          "weight": "strong"
+        },
+        {
+          "word": "诚意金",
+          "weight": "strong"
+        },
+        {
+          "word": "删完再转",
+          "weight": "strong"
+        },
+        {
+          "word": "尾款",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -1304,6 +1524,22 @@
         {
           "word": "小姐姐",
           "weight": "strong"
+        },
+        {
+          "word": "约会",
+          "weight": "medium"
+        },
+        {
+          "word": "诚意金",
+          "weight": "strong"
+        },
+        {
+          "word": "路费",
+          "weight": "strong"
+        },
+        {
+          "word": "返款",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -1400,6 +1636,18 @@
         {
           "word": "突发疾病",
           "weight": "strong"
+        },
+        {
+          "word": "保释金",
+          "weight": "strong"
+        },
+        {
+          "word": "急用钱",
+          "weight": "strong"
+        },
+        {
+          "word": "别告诉",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -1517,6 +1765,26 @@
         },
         {
           "word": "余额截图发给我",
+          "weight": "strong"
+        },
+        {
+          "word": "应酬",
+          "weight": "medium"
+        },
+        {
+          "word": "垫钱",
+          "weight": "strong"
+        },
+        {
+          "word": "帮我转",
+          "weight": "medium"
+        },
+        {
+          "word": "转账截图",
+          "weight": "strong"
+        },
+        {
+          "word": "回头还你",
           "weight": "strong"
         }
       ],
@@ -1647,6 +1915,26 @@
         {
           "word": "日入300",
           "weight": "strong"
+        },
+        {
+          "word": "一单",
+          "weight": "medium"
+        },
+        {
+          "word": "返款",
+          "weight": "strong"
+        },
+        {
+          "word": "解锁提现",
+          "weight": "strong"
+        },
+        {
+          "word": "系统检测到",
+          "weight": "medium"
+        },
+        {
+          "word": "大额",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -1799,6 +2087,30 @@
         {
           "word": "错过就没了",
           "weight": "strong"
+        },
+        {
+          "word": "数字货币",
+          "weight": "strong"
+        },
+        {
+          "word": "内测名额",
+          "weight": "strong"
+        },
+        {
+          "word": "占位",
+          "weight": "strong"
+        },
+        {
+          "word": "保本",
+          "weight": "medium"
+        },
+        {
+          "word": "认购",
+          "weight": "strong"
+        },
+        {
+          "word": "跟单",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -1928,6 +2240,22 @@
         {
           "word": "二等奖",
           "weight": "strong"
+        },
+        {
+          "word": "领取奖金",
+          "weight": "strong"
+        },
+        {
+          "word": "兑奖",
+          "weight": "strong"
+        },
+        {
+          "word": "激活费",
+          "weight": "strong"
+        },
+        {
+          "word": "一等奖",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -2055,6 +2383,38 @@
         {
           "word": "返水30%",
           "weight": "strong"
+        },
+        {
+          "word": "彩金",
+          "weight": "strong"
+        },
+        {
+          "word": "包赢",
+          "weight": "strong"
+        },
+        {
+          "word": "回血",
+          "weight": "strong"
+        },
+        {
+          "word": "带单",
+          "weight": "strong"
+        },
+        {
+          "word": "导师",
+          "weight": "medium"
+        },
+        {
+          "word": "操盘",
+          "weight": "strong"
+        },
+        {
+          "word": "刷流水",
+          "weight": "strong"
+        },
+        {
+          "word": "对半分",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -2173,6 +2533,26 @@
         {
           "word": "被锁定",
           "weight": "strong"
+        },
+        {
+          "word": "代充",
+          "weight": "strong"
+        },
+        {
+          "word": "外挂",
+          "weight": "strong"
+        },
+        {
+          "word": "限定皮肤",
+          "weight": "strong"
+        },
+        {
+          "word": "账号交易",
+          "weight": "medium"
+        },
+        {
+          "word": "担保",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -2293,6 +2673,30 @@
         {
           "word": "付激活费",
           "weight": "strong"
+        },
+        {
+          "word": "包装费",
+          "weight": "strong"
+        },
+        {
+          "word": "秒批",
+          "weight": "strong"
+        },
+        {
+          "word": "银监会",
+          "weight": "strong"
+        },
+        {
+          "word": "还款能力",
+          "weight": "medium"
+        },
+        {
+          "word": "信用额度",
+          "weight": "medium"
+        },
+        {
+          "word": "放款",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -2437,6 +2841,22 @@
         {
           "word": "损坏",
           "weight": "strong"
+        },
+        {
+          "word": "三倍赔偿",
+          "weight": "strong"
+        },
+        {
+          "word": "铂金会员",
+          "weight": "strong"
+        },
+        {
+          "word": "激活金",
+          "weight": "strong"
+        },
+        {
+          "word": "质检不合格",
+          "weight": "strong"
         }
       ],
       "confusable_with": [
@@ -2526,6 +2946,22 @@
         {
           "word": "系统升级",
           "weight": "strong"
+        },
+        {
+          "word": "海关扣押",
+          "weight": "strong"
+        },
+        {
+          "word": "保管费",
+          "weight": "strong"
+        },
+        {
+          "word": "违禁品",
+          "weight": "strong"
+        },
+        {
+          "word": "改址",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -2616,6 +3052,22 @@
         {
           "word": "被限制登录",
           "weight": "strong"
+        },
+        {
+          "word": "百万保障",
+          "weight": "strong"
+        },
+        {
+          "word": "异地登录",
+          "weight": "strong"
+        },
+        {
+          "word": "微信支付分",
+          "weight": "strong"
+        },
+        {
+          "word": "零钱被冻结",
+          "weight": "strong"
         }
       ],
       "confusable_with": []
@@ -2692,6 +3144,30 @@
         {
           "word": "付手续费",
           "weight": "strong"
+        },
+        {
+          "word": "航班",
+          "weight": "medium"
+        },
+        {
+          "word": "超售",
+          "weight": "strong"
+        },
+        {
+          "word": "行程单",
+          "weight": "strong"
+        },
+        {
+          "word": "锁位",
+          "weight": "strong"
+        },
+        {
+          "word": "退票",
+          "weight": "medium"
+        },
+        {
+          "word": "差价",
+          "weight": "medium"
         }
       ],
       "confusable_with": []
@@ -2828,6 +3304,34 @@
         {
           "word": "爆燃风险",
           "weight": "strong"
+        },
+        {
+          "word": "燃气软管",
+          "weight": "strong"
+        },
+        {
+          "word": "燃气安检",
+          "weight": "strong"
+        },
+        {
+          "word": "燃气管道",
+          "weight": "strong"
+        },
+        {
+          "word": "安装费",
+          "weight": "medium"
+        },
+        {
+          "word": "燃气用量",
+          "weight": "medium"
+        },
+        {
+          "word": "泄漏风险",
+          "weight": "strong"
+        },
+        {
+          "word": "上门费",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -2963,6 +3467,26 @@
         {
           "word": "远程抄表异常",
           "weight": "strong"
+        },
+        {
+          "word": "智能电表",
+          "weight": "strong"
+        },
+        {
+          "word": "偷电",
+          "weight": "strong"
+        },
+        {
+          "word": "欠缴",
+          "weight": "medium"
+        },
+        {
+          "word": "线路",
+          "weight": "weak"
+        },
+        {
+          "word": "阶梯电价",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
@@ -3069,6 +3593,42 @@
         {
           "word": "有技术手段",
           "weight": "strong"
+        },
+        {
+          "word": "删帖子",
+          "weight": "strong"
+        },
+        {
+          "word": "查监控",
+          "weight": "strong"
+        },
+        {
+          "word": "盗取",
+          "weight": "strong"
+        },
+        {
+          "word": "恢复手机",
+          "weight": "strong"
+        },
+        {
+          "word": "社保缴纳",
+          "weight": "medium"
+        },
+        {
+          "word": "征信黑名单",
+          "weight": "strong"
+        },
+        {
+          "word": "入侵",
+          "weight": "strong"
+        },
+        {
+          "word": "改成绩",
+          "weight": "strong"
+        },
+        {
+          "word": "情人的",
+          "weight": "strong"
         }
       ],
       "confusable_with": []
@@ -3135,6 +3695,50 @@
         {
           "word": "核查",
           "weight": "strong"
+        },
+        {
+          "word": "网警",
+          "weight": "strong"
+        },
+        {
+          "word": "赌博平台",
+          "weight": "strong"
+        },
+        {
+          "word": "境外",
+          "weight": "medium"
+        },
+        {
+          "word": "木马",
+          "weight": "strong"
+        },
+        {
+          "word": "黑名单",
+          "weight": "medium"
+        },
+        {
+          "word": "跳板",
+          "weight": "strong"
+        },
+        {
+          "word": "光猫",
+          "weight": "medium"
+        },
+        {
+          "word": "涉黄",
+          "weight": "strong"
+        },
+        {
+          "word": "解封费",
+          "weight": "strong"
+        },
+        {
+          "word": "验资",
+          "weight": "strong"
+        },
+        {
+          "word": "诈骗号码",
+          "weight": "medium"
         }
       ],
       "confusable_with": [
