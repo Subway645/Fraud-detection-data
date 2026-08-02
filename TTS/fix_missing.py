@@ -5,7 +5,7 @@ import pandas as pd
 from config import TEXT_DIR, FRAUD_DIR, AD_DIR, NORMAL_DIR
 
 # ========== 配置区 ==========
-CATEGORY = "normal"  # "fraud" / "ad" / "normal" / "all"
+CATEGORY = "all"  # "fraud" / "ad" / "normal" / "all"
 SEMAPHORE_LIMIT = 8
 MIN_FILE_SIZE = 5000  # 小于5KB视为损坏
 # ===========================
