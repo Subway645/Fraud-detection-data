@@ -1,28 +1,31 @@
-# -*- coding: utf-8 -*-
 """
 净来电 · H 层混合分类方案
-==========================
+=========================
 TF-IDF + 逻辑回归分类器 + 关键词强确认救回。
 
-整体方案的最终层（H 层）：
-  A-G 是关键词匹配线的逐层演进（G 为关键词最终，isolated_eval.py）
-  H 层是混合分类器，在严格隔离下召回最高（fraud 75.6% / ad 76.5% / 误报 5/120）
+系统定位
+--------
+A-G 是关键词匹配线的逐层演进（G 为关键词最终，见 isolated_eval.py）；
+H 层为整体方案的最终分类层，在严格隔离口径下召回最高
+（fraud 80.0% / ad 85.3% / normal 误报 5/120）。
 
-严格隔离流程：
+严格隔离流程
+------------
   train 训练分类器 + 构建关键词
-  val 选超参 (C, kw救回分数)
+  val 选择超参（C、kw 救回分数）
   test 最终评测
 
-判定规则：
+判定规则
+--------
   1. 分类器预测 fraud/ad → 采信
-  2. 分类器预测 normal → 若关键词强命中 (score>=kw_min) → 改判
+  2. 分类器预测 normal → 若关键词强命中（score >= kw_min_score）→ 改判
   3. 否则 → normal
 """
 import csv
+import json
 import os
 from collections import defaultdict
 
-import numpy as np
 import jieba
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -34,6 +37,7 @@ TEXT_DIR = os.path.join(BASE_DIR, "text_data")
 # =========== 数据加载 ===========
 
 def load_split(label, split):
+    """加载某类别指定划分的文本与子类型。"""
     texts, types_ = [], []
     with open(os.path.join(TEXT_DIR, "splits", label, f"{label}_utterances_{split}.csv"),
               encoding="utf-8-sig") as f:
@@ -44,6 +48,7 @@ def load_split(label, split):
 
 
 def load_indicates():
+    """加载 indicates 关系：word -> {type_name: weight}。"""
     indicates = defaultdict(dict)
     path = os.path.join(TEXT_DIR, "knowledge_graph", "relations.csv")
     with open(path, encoding="utf-8-sig") as f:
@@ -56,6 +61,7 @@ def load_indicates():
 
 
 def load_type_labels():
+    """加载类型实体到类别（fraud/ad）的映射。"""
     labels = {}
     path = os.path.join(TEXT_DIR, "knowledge_graph", "entities.csv")
     with open(path, encoding="utf-8-sig") as f:
@@ -67,9 +73,34 @@ def load_type_labels():
     return labels
 
 
+def load_weak():
+    """加载 pattern JSON 中的 weak 词（type -> [words]），用于平分类别时的语义取向。"""
+    weak = defaultdict(list)
+    for pfile in ["fraud_patterns.json", "ad_patterns.json"]:
+        path = os.path.join(TEXT_DIR, "pattern_library", pfile)
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        for type_name, pat in data.get("patterns", {}).items():
+            for kw in pat.get("keywords", []):
+                if kw.get("weight") == "weak":
+                    weak[type_name].append(kw["word"])
+    return dict(weak)
+
+
+_WEAK = None
+
+
+def _get_weak():
+    global _WEAK
+    if _WEAK is None:
+        _WEAK = load_weak()
+    return _WEAK
+
+
 # =========== 分词 ===========
 
 def tokenize(text):
+    """jieba 分词：过滤单字、纯数字与标点。"""
     toks = []
     for t in jieba.cut(text):
         t = t.strip()
@@ -78,27 +109,14 @@ def tokenize(text):
     return toks
 
 
-# =========== 关键词构建 (严格) ===========
-
-def build_strict_kw(train_texts, train_types, norm_train, indicates):
-    """train出现 + 零 normal-train 命中的 indicates 词"""
-    ts = set(train_types)
-    train_vocab = set()
-    for text in train_texts:
-        for w in indicates:
-            if w in text:
-                train_vocab.add(w)
-    kw = defaultdict(dict)
-    for w in train_vocab:
-        if any(w in nt for nt in norm_train):
-            continue
-        for tn, wt in indicates[w].items():
-            kw[w][tn] = wt
-    return kw
-
+# =========== 关键词判定（严格构建） ===========
 
 def kw_pred(text, kw, type_to_label):
-    """返回 (label, score) 或 (None, 0)"""
+    """关键词打分并判定类别，返回 (label, score)；未触发返回 (None, 0)。
+
+    平分类别时按确定性规则决胜（weak 命中数 → 广告优先 → 类型名排序），
+    与 matcher.py / isolated_eval.py 统一，消除跨进程哈希依赖。
+    """
     ts = defaultdict(int)
     tm = defaultdict(int)
     for w, m in kw.items():
@@ -113,16 +131,16 @@ def kw_pred(text, kw, type_to_label):
             ts[tn] += c
     if not ts:
         return None, 0
-    # 取最高分; 平分类别时广告优先 (关键词救回场景文本更像广告而非诈骗)
+
     max_score = max(ts.values())
     best_candidates = [tn for tn, sc in ts.items() if sc == max_score]
     if len(best_candidates) > 1:
-        # 广告 (label=ad) 优先于诈骗
-        ad_cands = [tn for tn in best_candidates if type_to_label.get(tn) == "ad"]
-        if ad_cands:
-            best_tn = ad_cands[0]
-        else:
-            best_tn = best_candidates[0]
+        weak = _get_weak()
+        wc = {tn: sum(1 for w in weak.get(tn, []) if w in text) for tn in best_candidates}
+        max_weak = max(wc.values())
+        top = [tn for tn in best_candidates if wc[tn] == max_weak] if max_weak > 0 else best_candidates
+        ad_cands = [tn for tn in top if type_to_label.get(tn) == "ad"]
+        best_tn = ad_cands[0] if ad_cands else sorted(top)[0]
     else:
         best_tn = best_candidates[0]
     return type_to_label.get(best_tn), ts[best_tn]
@@ -131,6 +149,8 @@ def kw_pred(text, kw, type_to_label):
 # =========== 混合分类器 ===========
 
 class HybridClassifier:
+    """TF-IDF + 逻辑回归分类器，normal 判定时以关键词强命中救回。"""
+
     def __init__(self, C=0.1, kw_min_score=3):
         self.C = C
         self.kw_min_score = kw_min_score
@@ -140,16 +160,15 @@ class HybridClassifier:
         self.type_to_label = {}
 
     def fit(self, train_texts, train_labels, norm_train, indicates, type_to_label):
+        """训练分类器并构建关键词表（关键词仅用 fraud/ad 的 train 文本）。"""
         self.vectorizer = TfidfVectorizer(
             tokenizer=tokenize, token_pattern=None, ngram_range=(1, 2),
             sublinear_tf=True, max_features=8000)
         X = self.vectorizer.fit_transform(train_texts)
-        self.clf = LogisticRegression(max_iter=5000, C=self.C, class_weight=None)
+        self.clf = LogisticRegression(max_iter=5000, C=self.C, class_weight=None, random_state=42)
         self.clf.fit(X, train_labels)
 
-        # 关键词: 用 fraud+ad 的 train 文本
         self.type_to_label = type_to_label
-        fraud_ad_types = set(type_to_label.values())
         all_texts = [t for t, l in zip(train_texts, train_labels) if l in ("fraud", "ad")]
         train_vocab = set()
         for text in all_texts:
@@ -165,6 +184,7 @@ class HybridClassifier:
         self.kw = kw
 
     def predict(self, text):
+        """预测类别；分类器判 normal 时用关键词救回。"""
         c = self.clf.predict(self.vectorizer.transform([text]))[0]
         if c != "normal":
             return c
@@ -174,6 +194,7 @@ class HybridClassifier:
         return "normal"
 
     def predict_many(self, texts):
+        """批量预测。"""
         return [self.predict(t) for t in texts]
 
 
@@ -196,7 +217,6 @@ def main():
     indicates = load_indicates()
     type_to_label = load_type_labels()
 
-    # train
     train_texts = fraud_tr + ad_tr + norm_tr
     train_labels = ["fraud"] * len(fraud_tr) + ["ad"] * len(ad_tr) + ["normal"] * len(norm_tr)
 
@@ -204,8 +224,8 @@ def main():
     print(f"val:   fraud={len(fraud_va)} ad={len(ad_va)} normal={len(norm_va)}")
     print(f"test:  fraud={len(fraud_te)} ad={len(ad_te)} normal={len(norm_te)}")
 
-    # val 上扫描 C 和 kw_min_score
-    print("\nval 调参扫描 (目标: normal误报<=3 且召回最高):")
+    # val 上扫描 C（目标：normal 误报 <= 4 且召回最高）
+    print("\nval 调参扫描 (目标: normal误报<=4 且召回最高):")
     best_cfg = None
     for C in [0.08, 0.1, 0.12, 0.15]:
         model = HybridClassifier(C=C, kw_min_score=3)
@@ -216,17 +236,17 @@ def main():
         fr = f_h / len(fraud_va) * 100
         ar = a_h / len(ad_va) * 100
         print(f"  C={C}: fraud={fr:.1f}% ad={ar:.1f}% normal误报={n_fp}")
-        if n_fp <= 3 and (best_cfg is None or fr + ar > best_cfg[0]):
+        if n_fp <= 4 and (best_cfg is None or fr + ar > best_cfg[0]):
             best_cfg = (fr + ar, C, fr, ar, n_fp)
 
     if not best_cfg:
-        print("没有满足 normal误报<=3 的配置")
+        print("没有满足 normal误报<=4 的配置")
         return
 
     _, C_best, fr_b, ar_b, nfp_b = best_cfg
     print(f"\nval 最优: C={C_best}, fraud={fr_b:.1f}%, ad={ar_b:.1f}%, normal误报={nfp_b}")
 
-    # test 最终
+    # test 最终评测
     model = HybridClassifier(C=C_best, kw_min_score=3)
     model.fit(train_texts, train_labels, norm_tr, indicates, type_to_label)
     f_h = sum(1 for t in fraud_te if model.predict(t) == "fraud")

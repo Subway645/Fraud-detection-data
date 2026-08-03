@@ -37,7 +37,7 @@
 │       └── normal/
 │
 ├── matcher/                               # 匹配算法 + 隔离评测
-│   ├── matcher.py                        # B层·生产口径打分（全量词表，含泄漏标注）
+│   ├── matcher.py                        # B层·生产口径打分（indicates全表，含泄漏标注）
 │   ├── isolated_eval.py                  # A-E+G 六层隔离评测（严格隔离，真实泛化）
 │   └── hybrid_clf.py                     # H层·混合分类器（TF-IDF+LR+关键词救回，整体最终）
 │
@@ -106,7 +106,7 @@ v1.5 统计（数据扩至 600/452 后补全）：
 
 ```json
 {
-  "metadata": { "version": "1.4", "groups": { "权威压迫型": [...], ... } },
+  "metadata": { "version": "1.5", "groups": { "权威压迫型": [...], ... } },
   "patterns": {
     "冒充公检法人员诈骗": {
       "group": "权威压迫型",
@@ -167,7 +167,7 @@ v1.5 统计（数据扩至 600/452 后补全）：
 | 模板库人工关键词 | 611 | pattern JSON 里人工设计的 strong/medium 词 |
 | 数据挖掘词 | 294 | 从 utterance 提取的品牌名/短语（如"携程""一单返5元"） |
 
-> 注意：数据挖掘词从全量 utterance 提取，因此 `matcher.py` 用全量词表评测的召回率（86%/82%）存在特征构建泄漏，**不是真实泛化能力**。真实泛化见下方验收结果的 G 列（72.2%/64.7%）。
+> 注意：数据挖掘词从全量 utterance 提取，因此 `matcher.py`（B 层）用 indicates 全表评测的召回率（88.3%/80.8%）存在特征构建泄漏，**不是真实泛化能力**。真实泛化见下方验收结果的 G 列（62.2%/64.7%）。
 
 查法：
 
@@ -185,7 +185,7 @@ relations[(relations["relation"]=="confusable_with") & (relations["head_name"].i
 
 ### 验收结果
 
-**统一独立 test 口径（严格隔离）：** C/D/E/G/H 均在独立 test（fraud 90 / ad 68 / normal 120）评测，val 只用于调参。A/B 为全量参考（含泄漏）。
+**统一独立 test 口径（严格隔离）：** C/D/E/G/H 均在独立 test（fraud 90 / ad 68 / normal 120）评测，val 只用于调参，normal 筛词只用 train（不偷看 test）。A/B 为全量参考（含泄漏）。
 
 | 层 | 脚本 | 流程 | fraud召回 | ad召回 | normal误报 |
 |----|------|------|---------|-------|-----------|
@@ -193,18 +193,19 @@ relations[(relations["relation"]=="confusable_with") & (relations["head_name"].i
 | B 图谱全量 | isolated_eval | 全量参考(含泄漏) | 89.2% | 79.9% | 22/800 |
 | C 类型过滤 | isolated_eval | train→test | 88.9% | 88.2% | 3/120 |
 | D 严格隔离 | isolated_eval | train→test | 63.3% | 54.4% | 2/120 |
-| E 完美词 | isolated_eval | train→test | 60.0% | 54.4% | 0/120 |
-| **G 类型片段** | isolated_eval | train→**val调参**→test | **72.2%** | **64.7%** | **0/120** |
-| **H 混合分类** | hybrid_clf | train→**val调参**→test | **75.6%** | **76.5%** | **5/120** |
+| E 完美词 | isolated_eval | train→test | 60.0% | 54.4% | 2/120 |
+| **G 类型片段** | isolated_eval | train→**val调参**→test | **62.2%** | **64.7%** | **3/120** |
+| **H 混合分类** | hybrid_clf | train→**val调参**→test | **80.0%** | **85.3%** | **5/120**\* |
 
-> 注：matcher.py 生产口径（全量词表）fraud 86.0% / ad 81.9% / 误报 0，含特征泄漏，仅日常检查用，非汇报口径。
+> 注：matcher.py B 层·生产口径（indicates 全表）fraud 88.3% / ad 80.8% / normal 误报 22/800，含特征泄漏，仅日常检查用，非汇报口径。
+> \* H 层正常误报受平台浮点精度影响 ±1：实测 Linux 5/120、Windows 6/120（LR 边界样本 #115「社保局退休认证」fraud/normal 概率差仅 0.0033），文档以 5/120 记，复跑可能出现 6/120。详见开发日志。
 
 **方案选择建议：**
-- 反诈 APP 实际部署：**H 层混合分类器**（召回最高，fraud 75.6% / ad 76.5%），但需接受 4.2% 误报
-- 需要零误报兜底：**G 层关键词匹配**（fraud 72.2% / ad 64.7% / 误报 0）
-- 最佳组合：关键词命中即报警（零误报）+ 关键词未命中时分类器二次判断
+- 反诈 APP 实际部署：**H 层混合分类器**（召回最高，fraud 80.0% / ad 85.3%），但需接受 5–6/120 误报（平台波动 ±1）
+- 需要零误报兜底：**G 层关键词匹配**（fraud 62.2% / ad 64.7% / 误报 3/120，normal 误报更低）
+- 最佳组合：G 层关键词兜底（误报更低）+ 分类器主判（召回/精确率更高）
 
-隔离评测方法论详见 docs/开发日志.md。`matcher.py` 的 86%/82% 高于真实值是因为 indicates 表中的 Brand/Phrase 实体从全量数据提取，存在特征构建泄漏。
+隔离评测方法论详见 docs/开发日志.md。`matcher.py` 的 88.3%/80.8% 高于真实值是因为 indicates 表中的 Brand/Phrase 实体从全量数据提取，存在特征构建泄漏。
 
 ---
 
@@ -295,9 +296,9 @@ TRAIN_RATIO = 0.7 / VAL_RATIO = 0.15 / TEST_RATIO = 0.15
 
 | 脚本 | 作用 | 运行 | 输出 |
 |------|------|------|------|
-| `matcher.py` | B层·生产口径打分（全量 indicates 词表+类型级阈值，含泄漏标注） | `python matcher.py` | 全量召回（含泄漏，日常检查） |
-| `isolated_eval.py` | A-E+G 隔离评测 + H 混合分类器（统一独立 test） | `python isolated_eval.py` | 严格隔离（G层 72.2%/64.7%/0，H层 75.6%/76.5%/5） |
-| `hybrid_clf.py` | H层·混合分类器（TF-IDF+LR+关键词救回） | `python hybrid_clf.py` | 整体最终（fraud 75.6% / ad 75.0% / 误报 4.2%） |
+| `matcher.py` | B层·生产口径打分（indicates 全表，含泄漏标注） | `python matcher.py` | 全量召回（含泄漏，日常检查） |
+| `isolated_eval.py` | A-E+G 隔离评测 + H 混合分类器（统一独立 test） | `python isolated_eval.py` | 严格隔离（G层 62.2%/64.7%/3，H层 80.0%/85.3%/5） |
+| `hybrid_clf.py` | H层·混合分类器（TF-IDF+LR+关键词救回） | `python hybrid_clf.py` | 整体最终（fraud 80.0% / ad 85.3% / 误报 5–6/120） |
 
 > 依赖：`hybrid_clf.py` 需要 `jieba` + `scikit-learn`。H 层与 G 层并存：G 层零误报兜底，H 层召回更高，按场景选用。
 
@@ -323,6 +324,7 @@ python split_data.py
 
 ## 编码注意
 
-- utterance CSV → **GBK**，pandas 读时加 `encoding="gbk"`
+- utterance 主表 CSV（fraud/ad/normal_utterances.csv）→ **GBK**，pandas 读时加 `encoding="gbk"`
+- splits/ 下划分 CSV → **UTF-8 BOM**（`split_data.py` 输出，脚本统一用 `utf-8-sig` 读取）
 - pattern JSON → UTF-8
 - knowledge_graph CSV → UTF-8 BOM

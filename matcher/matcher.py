@@ -1,48 +1,37 @@
 # -*- coding: utf-8 -*-
 """
 净来电 · 话术模板匹配算法（B 层口径 · 生产打分）
-===============================================
-基于 indicates 全表 + 类型确认片段两层融合做三档权重打分。
+================================================
+基于 indicates 全表的三档权重打分器。
 
-⚠️ 口径说明（重要）：
-  - 本脚本第一层使用【全量 indicates 表】（905 词，过滤 normal 命中词），
-    对应 isolated_eval.py 的 B 层（图谱全量·含泄漏）
-  - 因为 indicates 表中的 Brand/Phrase 实体从全量 utterance 数据提取，
-    与评测数据同源，存在特征构建阶段的泄漏。
-  - 所以本脚本输出的召回率（fraud 86.0% / ad 81.9%）是【生产环境最佳性能】，
-    【不是】真实泛化能力。
-  - 真实泛化（严格隔离）见：
-      · G 层关键词（真正从 train 推导）：isolated_eval.py（fraud 72.2% / ad 64.7% / 误报 0）
-      · H 层混合分类器：hybrid_clf.py（fraud 75.6% / ad 76.5% / 误报 5/120）
+口径说明
+--------
+本脚本即 isolated_eval.py 的 B 层（图谱全量·含泄漏）：
+  - 使用【全量 indicates 表】（905 词），不做 normal 过滤，不做类型确认片段
+  - 因 indicates 表中的 Brand/Phrase 实体从全量 utterance 提取，与评测数据
+    同源，存在特征构建阶段的泄漏
+  - 输出（fraud 88.3% / ad 80.8% / normal 误报 22/800）为生产环境最佳性能，
+    【不是】真实泛化能力
+真实泛化（严格隔离）见 isolated_eval.py：
+  · G 层关键词（train 推导 + val 调参）：fraud 62.2% / ad 64.7% / 误报 3/120
+  · H 层混合分类器：hybrid_clf.py：fraud 80.0% / ad 85.3% / 误报 5/120
 
-用途：生产部署 / 日常检查（要尽可能全的词表拦诈骗）。
+权重规则
+--------
+  strong  命中 +3 分，单次命中即可触发报警
+  medium  命中 +1 分，同一类型需 >= 2 个 medium 才计入
+  weak    不进 indicates 表，仅用于平分类别时的语义取向（见 match_text）
 
-权重规则：
-  strong: 命中 +3 分，单次命中即可触发报警
-  medium: 命中 +1 分，同一类型需 >=2 个 medium 才计入
-  weak:   不进 indicates 表，留在 pattern JSON 做平滑（本算法不处理）
+判定规则
+--------
+  1. 对每个类型累计得分，最高分 >= THRESHOLD 时判定为该类型
+  2. 诈骗/广告同时命中时取高分者
+  3. 平分类别时按确定性规则决胜（weak 命中数 → 广告优先 → 类型名排序）
 
-判定规则：
-  - 对每个类型（诈骗/广告）累计得分
-  - 最高分类型得分 >= THRESHOLD 时，判定为该类型
-  - 同时命中诈骗和广告时取高分者
-
-关键词来源（两层融合）：
-  1. indicates 全表（从 knowledge_graph/relations.csv 加载）：过滤 normal 命中词
-  2. 类型确认片段：从长词自动提取的 2-3gram，需 train 同类确认
-
-审核承诺：
-  零正常误报：所有注入词需在 800 条正常数据中零命中
-  类型确认片段：仅在 train 文本上推导，不窥探 val/test
-
-与 G 层 / H 层的关系：
-  - G 层（isolated_eval.py）：关键词匹配的严格隔离版（train 推导），零误报兜底
-  - H 层（hybrid_clf.py）：TF-IDF+LR 分类器 + 关键词救回，召回更高
-  - 本文件（matcher.py）：生产口径（B 层全量词表），含特征泄漏，仅作日常检查
-
-用法：
-  from matcher.matcher import match_text, evaluate
-  result = match_text("您的银行卡涉嫌洗钱，请转到安全账户")
+用法
+----
+  from matcher.matcher import match_text
+  match_text("您的银行卡涉嫌洗钱，请转到安全账户")
   # -> ("冒充公检法人员诈骗", "fraud", 6, {"洗钱": "strong", "安全账户": "strong"})
 """
 import csv
@@ -54,17 +43,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEXT_DIR = os.path.join(BASE_DIR, "text_data")
 KG_DIR = os.path.join(BASE_DIR, "text_data", "knowledge_graph")
 
-# 打分参数
 STRONG_SCORE = 3
 MEDIUM_SCORE = 1
 MEDIUM_MIN = 2
 THRESHOLD = 3
 
 
-# =========== 数据加载（延迟初始化，避免启动开销） ===========
+# =========== 数据加载 ===========
 
 def _load_indicates():
-    """从 relations.csv 构建 word -> {type_name: weight} 表"""
+    """构建 word -> {type_name: weight} 映射（来自 relations.csv 的 indicates 关系）。"""
     table = defaultdict(dict)
     path = os.path.join(KG_DIR, "relations.csv")
     if not os.path.exists(path):
@@ -84,7 +72,7 @@ def _load_indicates():
 
 
 def _load_type_labels():
-    """从 entities.csv 判断类型是诈骗还是广告"""
+    """构建 type_name -> (fraud|ad) 映射（来自 entities.csv 的类型实体）。"""
     labels = {}
     path = os.path.join(KG_DIR, "entities.csv")
     if not os.path.exists(path):
@@ -98,152 +86,60 @@ def _load_type_labels():
     return labels
 
 
-def _load_normal_texts():
-    """加载全部 800 条正常话术（用于 zero-hit 验证）"""
-    texts = []
-    for split in ['train', 'val', 'test']:
-        path = os.path.join(TEXT_DIR, "splits", "normal", f"normal_utterances_{split}.csv")
-        if os.path.exists(path):
-            try:
-                with open(path, encoding="utf-8-sig") as f:
-                    for row in csv.DictReader(f):
-                        texts.append(row["text"])
-            except Exception:
-                pass
-    return texts
+def _load_weak():
+    """加载 pattern JSON 中的 weak 词（type -> [words]）。
 
-
-def _load_train_texts():
-    """加载 fraud+ad train 数据用于类型确认片段"""
-    all_train = []
-    all_types = []
-    for label in ['fraud', 'ad']:
-        path = os.path.join(TEXT_DIR, "splits", label, f"{label}_utterances_train.csv")
-        if os.path.exists(path):
-            with open(path, encoding="utf-8-sig") as f:
-                for row in csv.DictReader(f):
-                    all_train.append(row["text"])
-                    all_types.append(row["type"])
-    return all_train, all_types
-
-
-def ngrams(s, n):
-    """提取所有 n-gram"""
-    return [s[i:i+n] for i in range(len(s) - n + 1)] if len(s) >= n else []
-
-
-def _build_type_confirmed_fragments(indicates, min_confirm=2):
+    weak 词不加分、不进 indicates 表，仅用于平分类别时的语义取向：
+    同分时命中 weak 词更多的类型在题材上更贴近。
     """
-    从 indicates 表中的长词（>=4字）提取类型确认短片段。
-
-    短片段需满足：
-      1. 在 train 同类文本中命中 >= min_confirm 次
-      2. 在所有正常数据中零命中
-
-    返回: {frag: {type_name: weight}}
-    """
-    all_train, all_types = _load_train_texts()
-    if not all_train:
-        return {}
-
-    normal_texts = _load_normal_texts()
-    train_types_set = set(all_types)
-
-    # 按类型组织 train 文本
-    type_to_texts = defaultdict(list)
-    for text, t in zip(all_train, all_types):
-        type_to_texts[t].append(text)
-
-    # 在 train 中出现的完整 indicates 词（已覆盖的不需要片段化）
-    train_vocab = set()
-    for text in all_train:
-        for w in indicates:
-            if w in text:
-                train_vocab.add(w)
-
-    # 找出长词缺失（>=4字，不在 train 中，但零 normal 命中）
-    long_missing = set()
-    for w in indicates:
-        if len(w) < 4:
+    weak = defaultdict(list)
+    for pfile in ["fraud_patterns.json", "ad_patterns.json"]:
+        path = os.path.join(TEXT_DIR, "pattern_library", pfile)
+        if not os.path.exists(path):
             continue
-        if w in train_vocab:
-            continue
-        if sum(1 for t in normal_texts if w in t) > 0:
-            continue
-        long_missing.add(w)
-
-    # 提取并验证片段
-    confirmed = defaultdict(dict)  # frag -> {type: weight}
-    for word in long_missing:
-        wtypes = indicates[word]
-        for n in [2, 3]:
-            for frag in set(ngrams(word, n)):
-                if frag in train_vocab:
-                    continue
-                if sum(1 for t in normal_texts if frag in t) > 0:
-                    continue
-                for tn, weight in wtypes.items():
-                    if tn not in train_types_set or tn not in type_to_texts:
-                        continue
-                    cnt = sum(1 for t in type_to_texts[tn] if frag in t)
-                    if cnt >= min_confirm:
-                        if tn not in confirmed[frag] or (weight == "strong" and confirmed[frag][tn] == "medium"):
-                            confirmed[frag][tn] = weight
-
-    return dict(confirmed)
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        for type_name, pat in data.get("patterns", {}).items():
+            for kw in pat.get("keywords", []):
+                if kw.get("weight") == "weak":
+                    weak[type_name].append(kw["word"])
+    return dict(weak)
 
 
-# =========== 关键词表构建（两层融合） ===========
+def _weak_hits(text, type_name, weak_table):
+    """统计 text 命中某类型 weak 词的个数。"""
+    return sum(1 for w in weak_table.get(type_name, []) if w in text)
+
+
+# =========== 关键词表构建（B 层：全量 indicates，不过滤） ===========
 
 def _build_keywords():
-    """
-    构建两层融合关键词表。
-
-    返回: (word_to_types, type_labels)
-      word_to_types: {word: {type_name: weight}}
-    """
+    """构建关键词表：indicates 全表原样使用，不做 normal 过滤，不做片段。"""
     indicates = _load_indicates()
     type_labels = _load_type_labels()
-    normal_texts = _load_normal_texts()
 
-    # 第一层：indicates 表词（过滤掉有 normal 命中的）
     word_to_types = defaultdict(lambda: defaultdict(str))
     for word, type_map in indicates.items():
-        if sum(1 for t in normal_texts if word in t) > 0:
-            continue
         for tn, wt in type_map.items():
             word_to_types[word][tn] = wt
-
-    # 第二层：类型确认片段
-    fragments = _build_type_confirmed_fragments(indicates, min_confirm=2)
-    for frag, type_map in fragments.items():
-        for tn, wt in type_map.items():
-            word_to_types[frag][tn] = wt
 
     return dict(word_to_types), type_labels
 
 
 # =========== 公开 API ===========
 
-
 def match_text(text):
-    """
-    对一段文本做话术匹配（两层融合关键词表：indicates 全表 + 类型确认片段）。
+    """对文本做话术匹配（indicates 全表）。
 
-    参数:
-        text: str, 待匹配的文本
-
-    返回:
-        (best_type, label, best_score, hits)
-        或 (None, None, 0, {})
+    返回 (best_type, label, best_score, hits)；未触发报警时返回 (None, None, 0, hits)。
     """
     if not text:
         return None, None, 0, {}
 
-    # 延迟加载
-    global _WORD_TO_TYPES, _TYPE_LABELS
+    global _WORD_TO_TYPES, _TYPE_LABELS, _WEAK
     if "_WORD_TO_TYPES" not in globals():
         _WORD_TO_TYPES, _TYPE_LABELS = _build_keywords()
+        _WEAK = _load_weak()
 
     type_scores = defaultdict(int)
     type_medium = defaultdict(int)
@@ -265,7 +161,18 @@ def match_text(text):
     if not type_scores:
         return None, None, 0, hits
 
-    best_type = max(type_scores, key=type_scores.get)
+    # 平分类别时按确定性规则决胜（与 isolated_eval.py / hybrid_clf.py 统一）
+    max_score = max(type_scores.values())
+    best_candidates = [tn for tn, sc in type_scores.items() if sc == max_score]
+    if len(best_candidates) > 1:
+        wc = {tn: _weak_hits(text, tn, _WEAK) for tn in best_candidates}
+        max_weak = max(wc.values())
+        top = [tn for tn in best_candidates if wc[tn] == max_weak] if max_weak > 0 else best_candidates
+        ad_cands = [tn for tn in top if _TYPE_LABELS.get(tn) == "ad"]
+        best_type = ad_cands[0] if ad_cands else sorted(top)[0]
+    else:
+        best_type = best_candidates[0]
+
     best_score = type_scores[best_type]
     if best_score < THRESHOLD:
         return None, None, best_score, hits
@@ -275,16 +182,17 @@ def match_text(text):
 
 
 def reload():
-    """强制重新加载关键词表（数据更新后调用）"""
-    global _WORD_TO_TYPES, _TYPE_LABELS
+    """重新构建关键词表（数据更新后调用），返回关键词总数。"""
+    global _WORD_TO_TYPES, _TYPE_LABELS, _WEAK
     _WORD_TO_TYPES, _TYPE_LABELS = _build_keywords()
+    _WEAK = _load_weak()
     return len(_WORD_TO_TYPES)
 
 
-# =========== 验收评测 ===========
+# =========== B 层口径评测 ===========
 
 def _load_utterances(label):
-    """读取某一类的全部话术文本和子类型"""
+    """读取某一类别的全部话术文本及子类型。"""
     path = os.path.join(TEXT_DIR, f"{label}_utterances.csv")
     texts, types_ = [], []
     try:
@@ -304,7 +212,7 @@ def _load_utterances(label):
 
 
 def evaluate():
-    """生产口径验收（B 层全量词表，含特征泄漏，仅日常检查）。"""
+    """B 层口径验收（indicates 全量，含特征泄漏，仅日常检查）。"""
     print("话术模板匹配算法验收 B层口径")
     results = {}
     for label, expect_label in [("fraud", "fraud"), ("ad", "ad"), ("normal", "normal")]:
@@ -339,8 +247,7 @@ def evaluate():
 
         print(f"\n[{label}] 样本 {total} 条，命中 {tp} 条，召回率 {recall:.1f}%")
         if label == "normal":
-            # normal 的正确行为是「未命中任何诈骗/广告类型」= 拒识
-            # 误报 = 被判成 fraud/ad 的 normal 样本
+            # normal 的正确行为是未命中任何诈骗/广告类型（拒识）；误报即被判成 fraud/ad
             fps = [(i, txt, pl, bt, sc) for i, txt, pl, bt, sc in wrong_label if pl is not None]
             print(f"    误报: {len(fps)} 条（normal 被判成 fraud/ad）")
             for i, txt, pl, bt, sc in fps[:8]:
@@ -364,7 +271,6 @@ def evaluate():
                     print(f"    主要混淆: {top_conf}")
 
     print("\n" + "=" * 64)
-    # 正常误报 = normal 被判成 fraud/ad 的样本数
     normal_fp = len([w for w in results['normal']['wrong'] if w[2] is not None])
     print(f"总结: 诈骗召回 {results['fraud']['recall']:.1f}% | "
           f"广告召回 {results['ad']['recall']:.1f}% | "
@@ -376,6 +282,6 @@ def evaluate():
 
 if __name__ == "__main__":
     n = reload()
-    print(f"已加载 {n} 个关键词（indicates 全表 + 类型确认片段）")
+    print(f"已加载 {n} 个关键词（indicates 全表）")
     print()
     evaluate()
