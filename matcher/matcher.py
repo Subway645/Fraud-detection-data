@@ -9,11 +9,11 @@
     对应 isolated_eval.py 的 B 层（图谱全量·含泄漏）
   - 因为 indicates 表中的 Brand/Phrase 实体从全量 utterance 数据提取，
     与评测数据同源，存在特征构建阶段的泄漏。
-  - 所以本脚本输出的召回率（fraud 86.0% / ad 81.9%）是【生产环境最佳性能】，
+  - 所以本脚本输出的召回率（fraud 85.8% / ad 80.8%）是【生产环境最佳性能】，
     【不是】真实泛化能力。
   - 真实泛化（严格隔离）见：
-      · G 层关键词（真正从 train 推导）：isolated_eval.py（fraud 72.2% / ad 64.7% / 误报 0）
-      · H 层混合分类器：hybrid_clf.py（fraud 75.6% / ad 76.5% / 误报 5/120）
+      · G 层关键词（train 推导 + val 调参）：isolated_eval.py（fraud 62.2% / ad 64.7% / 误报 3/120）
+      · H 层混合分类器：hybrid_clf.py（fraud 80.0% / ad 85.3% / 误报 5/120）
 
 用途：生产部署 / 日常检查（要尽可能全的词表拦诈骗）。
 
@@ -125,6 +125,31 @@ def _load_train_texts():
                     all_train.append(row["text"])
                     all_types.append(row["type"])
     return all_train, all_types
+
+
+def _load_weak():
+    """加载 pattern JSON 中的 weak 词（type -> [weak words]）。
+
+    weak 词不加分、不进 indicates 表，仅用于平分类别时的语义取向：
+    同分时看哪个类型命中 weak 词更多，题材上就更贴近哪个类型。
+    """
+    weak = defaultdict(list)
+    for pfile in ["fraud_patterns.json", "ad_patterns.json"]:
+        path = os.path.join(TEXT_DIR, "pattern_library", pfile)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        for type_name, pat in data.get("patterns", {}).items():
+            for kw in pat.get("keywords", []):
+                if kw.get("weight") == "weak":
+                    weak[type_name].append(kw["word"])
+    return dict(weak)
+
+
+def _weak_hits(text, type_name, weak_table):
+    """统计 text 命中某类型的 weak 词数量"""
+    return sum(1 for w in weak_table.get(type_name, []) if w in text)
 
 
 def ngrams(s, n):
@@ -241,9 +266,10 @@ def match_text(text):
         return None, None, 0, {}
 
     # 延迟加载
-    global _WORD_TO_TYPES, _TYPE_LABELS
+    global _WORD_TO_TYPES, _TYPE_LABELS, _WEAK
     if "_WORD_TO_TYPES" not in globals():
         _WORD_TO_TYPES, _TYPE_LABELS = _build_keywords()
+        _WEAK = _load_weak()
 
     type_scores = defaultdict(int)
     type_medium = defaultdict(int)
@@ -265,7 +291,18 @@ def match_text(text):
     if not type_scores:
         return None, None, 0, hits
 
-    best_type = max(type_scores, key=type_scores.get)
+    # 取最高分; 平分类别时按「weak 命中数多者优先 → 广告优先 → 按类型名排序」的确定性规则
+    # (与 isolated_eval.py / hybrid_clf.py 的 kw_pred 统一，消除跨进程哈希依赖)
+    max_score = max(type_scores.values())
+    best_candidates = [tn for tn, sc in type_scores.items() if sc == max_score]
+    if len(best_candidates) > 1:
+        wc = {tn: _weak_hits(text, tn, _WEAK) for tn in best_candidates}
+        max_weak = max(wc.values())
+        top = [tn for tn in best_candidates if wc[tn] == max_weak] if max_weak > 0 else best_candidates
+        ad_cands = [tn for tn in top if _TYPE_LABELS.get(tn) == "ad"]
+        best_type = ad_cands[0] if ad_cands else sorted(top)[0]
+    else:
+        best_type = best_candidates[0]
     best_score = type_scores[best_type]
     if best_score < THRESHOLD:
         return None, None, best_score, hits
@@ -276,8 +313,9 @@ def match_text(text):
 
 def reload():
     """强制重新加载关键词表（数据更新后调用）"""
-    global _WORD_TO_TYPES, _TYPE_LABELS
+    global _WORD_TO_TYPES, _TYPE_LABELS, _WEAK
     _WORD_TO_TYPES, _TYPE_LABELS = _build_keywords()
+    _WEAK = _load_weak()
     return len(_WORD_TO_TYPES)
 
 

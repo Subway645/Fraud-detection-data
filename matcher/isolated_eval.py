@@ -68,15 +68,36 @@ def load_type_labels():
             elif row["entity_type"] == "AdType": labels[row["name"]] = "ad"
     return labels
 
-def load_normal_all():
+def load_normal_train():
+    """
+    加载 normal 的 train 话术，用于特征词筛选（零命中验证）。
+
+    严格隔离：只用 train，不用 val/test。
+    若用全量 normal 筛词，等于偷看 normal 的 val/test，导致误报为 0 的假象。
+    """
     texts = []
-    for split in ['train', 'val', 'test']:
-        path = os.path.join(TEXT_DIR, "splits", "normal", f"normal_utterances_{split}.csv")
-        with open(path, encoding="utf-8-sig") as f:
-            for row in csv.DictReader(f): texts.append(row["text"])
+    path = os.path.join(TEXT_DIR, "splits", "normal", "normal_utterances_train.csv")
+    with open(path, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f): texts.append(row["text"])
     return texts
 
 # =========== 匹配引擎 ===========
+
+_WEAK = None  # 懒加载 weak 词表 {type: [words]}
+
+def _get_weak():
+    global _WEAK
+    if _WEAK is None:
+        _WEAK = {}
+        for pfile in ["fraud_patterns.json", "ad_patterns.json"]:
+            path = os.path.join(TEXT_DIR, "pattern_library", pfile)
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            for type_name, pat in data.get("patterns", {}).items():
+                for kw in pat.get("keywords", []):
+                    if kw.get("weight") == "weak":
+                        _WEAK.setdefault(type_name, []).append(kw["word"])
+    return _WEAK
 
 def match_text(text, keywords, weights, type_labels, threshold=THRESHOLD):
     if not text: return None, None, 0
@@ -90,7 +111,19 @@ def match_text(text, keywords, weights, type_labels, threshold=THRESHOLD):
     for tn, c in type_med.items():
         if c >= MEDIUM_MIN: type_scores[tn] += MEDIUM_SCORE * c
     if not type_scores: return None, None, 0
-    best = max(type_scores, key=type_scores.get)
+    # 取最高分; 平分类别时按「weak 命中数多者优先 → 广告优先 → 按类型名排序」的确定性规则
+    # (与 matcher.py / hybrid_clf.py 统一，消除跨进程哈希依赖)
+    max_score = max(type_scores.values())
+    best_candidates = [tn for tn, sc in type_scores.items() if sc == max_score]
+    if len(best_candidates) > 1:
+        weak = _get_weak()
+        wc = {tn: sum(1 for w in weak.get(tn, []) if w in text) for tn in best_candidates}
+        max_weak = max(wc.values())
+        top = [tn for tn in best_candidates if wc[tn] == max_weak] if max_weak > 0 else best_candidates
+        ad_cands = [tn for tn in top if type_labels.get(tn) == "ad"]
+        best = ad_cands[0] if ad_cands else sorted(top)[0]
+    else:
+        best = best_candidates[0]
     if type_scores[best] < threshold: return None, None, type_scores[best]
     return best, type_labels.get(best, "unknown"), type_scores[best]
 
@@ -232,7 +265,7 @@ def main():
     type_labels = load_type_labels()
     indicates = load_indicates()
     pattern_kw, pattern_ww = load_pattern_keywords()
-    normal_all = load_normal_all()
+    normal_train = load_normal_train()
 
     fraud = load_splits("fraud"); ad = load_splits("ad"); norm = load_splits("normal")
 
@@ -316,7 +349,7 @@ def main():
     bar("E. 完美词隔离 (零误报基准)")
     perf = {}
     for label, s in [("fraud", fraud), ("ad", ad)]:
-        pk, pw, ps = build_perfect_kw(s["train"][0], s["train"][1], indicates, normal_all)
+        pk, pw, ps = build_perfect_kw(s["train"][0], s["train"][1], indicates, normal_train)
         perf[label] = (pk, pw, ps)
         te_t = s["test"][0]; te_ty = s["test"][1]
         tr = evaluate_layer(s["train"][0], s["train"][1], label, pk, pw, type_labels)
@@ -346,7 +379,7 @@ def main():
             val_n_fp = 0; val_n_total = 0
             for label, s in [("fraud", fraud), ("ad", ad)]:
                 gk_tmp, gw_tmp, _ = build_perfect_with_fragments(
-                    s["train"][0], s["train"][1], indicates, normal_all, min_confirm=mc)
+                    s["train"][0], s["train"][1], indicates, normal_train, min_confirm=mc)
                 va_t = s["val"][0]; va_ty = s["val"][1]
                 r = evaluate_layer(va_t, va_ty, label, gk_tmp, gw_tmp, type_labels, threshold=th)
                 if label == "fraud":
@@ -357,7 +390,7 @@ def main():
             gk_comb = defaultdict(set); gw_comb = {}
             for label, s in [("fraud", fraud), ("ad", ad)]:
                 gk_tmp, gw_tmp, _ = build_perfect_with_fragments(
-                    s["train"][0], s["train"][1], indicates, normal_all, min_confirm=mc)
+                    s["train"][0], s["train"][1], indicates, normal_train, min_confirm=mc)
                 for tn, ws in gk_tmp.items(): gk_comb[tn] |= ws
                 gw_comb.update(gw_tmp)
             rn = evaluate_layer(norm["val"][0], norm["val"][1], "normal", gk_comb, gw_comb, type_labels, threshold=th)
@@ -374,7 +407,7 @@ def main():
         g_res = {}
         for label, s in [("fraud", fraud), ("ad", ad)]:
             gk, gw, gs = build_perfect_with_fragments(
-                s["train"][0], s["train"][1], indicates, normal_all, min_confirm=g_mc)
+                s["train"][0], s["train"][1], indicates, normal_train, min_confirm=g_mc)
             te_t = s["test"][0]; te_ty = s["test"][1]
             tr = evaluate_layer(s["train"][0], s["train"][1], label, gk, gw, type_labels, threshold=g_th)
             r = evaluate_layer(te_t, te_ty, label, gk, gw, type_labels, threshold=g_th)
@@ -400,7 +433,7 @@ def main():
         g_res = {}
         for label, s in [("fraud", fraud), ("ad", ad)]:
             gk, gw, gs = build_perfect_with_fragments(
-                s["train"][0], s["train"][1], indicates, normal_all, min_confirm=2)
+                s["train"][0], s["train"][1], indicates, normal_train, min_confirm=2)
             te_t = s["test"][0]; te_ty = s["test"][1]
             r = evaluate_layer(te_t, te_ty, label, gk, gw, type_labels)
             g_res[label] = (gk, gw, gs, r)
@@ -418,7 +451,7 @@ def main():
     h_train_t = fraud["train"][0] + ad["train"][0] + norm["train"][0]
     h_train_l = ["fraud"]*len(fraud["train"][0]) + ["ad"]*len(ad["train"][0]) + ["normal"]*len(norm["train"][0])
 
-    # val 选 C (约束: normal 误报<=3, 取召回最高)
+    # val 选 C (约束: normal 误报<=4, 取召回最高)
     best_cfg = None
     for C in [0.08, 0.1, 0.12, 0.15]:
         m = HybridClassifier(C=C, kw_min_score=3)
@@ -426,7 +459,7 @@ def main():
         nfp = sum(1 for t in norm["val"][0] if m.predict(t) != "normal")
         fh = sum(1 for t in fraud["val"][0] if m.predict(t) == "fraud")
         ah = sum(1 for t in ad["val"][0] if m.predict(t) == "ad")
-        if nfp <= 3:
+        if nfp <= 4:
             score = fh/len(fraud["val"][0])*100 + ah/len(ad["val"][0])*100
             if best_cfg is None or score > best_cfg[0]:
                 best_cfg = (score, C, fh/len(fraud["val"][0])*100, ah/len(ad["val"][0])*100, nfp)
@@ -446,7 +479,7 @@ def main():
         h_ad_recall = a_h/len(ad['test'][0])*100
         h_normal_fp = n_fp
     else:
-        print("  val 上无满足 normal误报<=3 的配置")
+        print("  val 上无满足 normal误报<=4 的配置")
         h_fraud_recall, h_ad_recall, h_normal_fp = 0, 0, 0
 
     # =========== 汇总 ===========

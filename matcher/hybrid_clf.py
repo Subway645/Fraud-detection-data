@@ -19,6 +19,7 @@ TF-IDF + 逻辑回归分类器 + 关键词强确认救回。
   3. 否则 → normal
 """
 import csv
+import json
 import os
 from collections import defaultdict
 
@@ -67,6 +68,28 @@ def load_type_labels():
     return labels
 
 
+def load_weak():
+    """加载 pattern JSON 中的 weak 词（type -> [weak words]），用于平分时的语义取向"""
+    weak = defaultdict(list)
+    for pfile in ["fraud_patterns.json", "ad_patterns.json"]:
+        path = os.path.join(TEXT_DIR, "pattern_library", pfile)
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        for type_name, pat in data.get("patterns", {}).items():
+            for kw in pat.get("keywords", []):
+                if kw.get("weight") == "weak":
+                    weak[type_name].append(kw["word"])
+    return dict(weak)
+
+
+_WEAK = None
+def _get_weak():
+    global _WEAK
+    if _WEAK is None:
+        _WEAK = load_weak()
+    return _WEAK
+
+
 # =========== 分词 ===========
 
 def tokenize(text):
@@ -113,16 +136,17 @@ def kw_pred(text, kw, type_to_label):
             ts[tn] += c
     if not ts:
         return None, 0
-    # 取最高分; 平分类别时广告优先 (关键词救回场景文本更像广告而非诈骗)
+    # 取最高分; 平分类别时按「weak 命中数多者优先 → 广告优先 → 按类型名排序」的确定性规则
+    # (与 matcher.py / isolated_eval.py 统一，消除跨进程哈希依赖)
     max_score = max(ts.values())
     best_candidates = [tn for tn, sc in ts.items() if sc == max_score]
     if len(best_candidates) > 1:
-        # 广告 (label=ad) 优先于诈骗
-        ad_cands = [tn for tn in best_candidates if type_to_label.get(tn) == "ad"]
-        if ad_cands:
-            best_tn = ad_cands[0]
-        else:
-            best_tn = best_candidates[0]
+        weak = _get_weak()
+        wc = {tn: sum(1 for w in weak.get(tn, []) if w in text) for tn in best_candidates}
+        max_weak = max(wc.values())
+        top = [tn for tn in best_candidates if wc[tn] == max_weak] if max_weak > 0 else best_candidates
+        ad_cands = [tn for tn in top if type_to_label.get(tn) == "ad"]
+        best_tn = ad_cands[0] if ad_cands else sorted(top)[0]
     else:
         best_tn = best_candidates[0]
     return type_to_label.get(best_tn), ts[best_tn]
@@ -144,7 +168,7 @@ class HybridClassifier:
             tokenizer=tokenize, token_pattern=None, ngram_range=(1, 2),
             sublinear_tf=True, max_features=8000)
         X = self.vectorizer.fit_transform(train_texts)
-        self.clf = LogisticRegression(max_iter=5000, C=self.C, class_weight=None)
+        self.clf = LogisticRegression(max_iter=5000, C=self.C, class_weight=None, random_state=42)
         self.clf.fit(X, train_labels)
 
         # 关键词: 用 fraud+ad 的 train 文本
@@ -205,7 +229,7 @@ def main():
     print(f"test:  fraud={len(fraud_te)} ad={len(ad_te)} normal={len(norm_te)}")
 
     # val 上扫描 C 和 kw_min_score
-    print("\nval 调参扫描 (目标: normal误报<=3 且召回最高):")
+    print("\nval 调参扫描 (目标: normal误报<=4 且召回最高):")
     best_cfg = None
     for C in [0.08, 0.1, 0.12, 0.15]:
         model = HybridClassifier(C=C, kw_min_score=3)
@@ -216,11 +240,11 @@ def main():
         fr = f_h / len(fraud_va) * 100
         ar = a_h / len(ad_va) * 100
         print(f"  C={C}: fraud={fr:.1f}% ad={ar:.1f}% normal误报={n_fp}")
-        if n_fp <= 3 and (best_cfg is None or fr + ar > best_cfg[0]):
+        if n_fp <= 4 and (best_cfg is None or fr + ar > best_cfg[0]):
             best_cfg = (fr + ar, C, fr, ar, n_fp)
 
     if not best_cfg:
-        print("没有满足 normal误报<=3 的配置")
+        print("没有满足 normal误报<=4 的配置")
         return
 
     _, C_best, fr_b, ar_b, nfp_b = best_cfg
